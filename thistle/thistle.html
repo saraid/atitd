@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Thistle Simulator</title>
+    <script src="https://unpkg.com/react@latest/dist/react.js"></script>
+    <script src="https://unpkg.com/react-dom@latest/dist/react-dom.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+    <script src="https://unpkg.com/lodash@latest/lodash.min.js"></script>
+    <script src="https://unpkg.com/redux@3.6.0/dist/redux.min.js"></script>
+    <script src="https://unpkg.com/react-redux@5.0.3/dist/react-redux.min.js"></script>
+    <style type="text/css">
+      #sidebar {
+        position: fixed;
+        right: 0;
+      }
+      .conversionTable {
+        min-width: 369px;
+        width: 400px;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+      .conversionTable .conversion {
+        text-align: center;
+        min-width: 30%;
+        max-width: 30%;
+        height: 14%;
+        white-space: nowrap;
+
+        padding: 0.2em;
+        border: solid 1px black;
+        color: black;
+      }
+      .conversionTable .conversion.void {
+        color: rgb(192, 128, 128);
+        text-decoration: line-through;
+      }
+      .conversionTable .conversion.highlight {
+        background-color: limegreen;
+      }
+
+      #simRecipe, #simGoal {
+        margin-top: 2em;
+        width: 400px;
+      }
+      #simRecipe input {
+        width: 100%;
+      }
+
+      tr.highlight {
+        font-weight: bold;
+      }
+      td {
+        text-align: right;
+      }
+      td.spacer {
+        width: 20px;
+      }
+      .tickActions {
+        white-space: nowrap;
+        padding: 0 1em;
+        text-align: center;
+        width: 200px;
+      }
+      .thistleVitamin {
+        font-family: monospace;
+      }
+      .thistleVitamin span.meetsGoal {
+        color: green;
+      }
+      .thistleVitamin span.failsGoal {
+        color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+    </div>
+    <script type="text/babel">
+
+      const TOGGLE_VOID = 'TOGGLE_VOID';
+      const RUN_RECIPE = 'RUN_RECIPE';
+
+      const initialState = {
+        daylight: 'daytime',
+        ticks: Array(41).fill({
+          resources: {
+            inputs: { nit: 50, pot: 50, h2o: 50, oxy: 50, sun: 99 },
+            vitamins: { asc: 0, bio: 0, car: 0, fol: 0, nia: 0, pyr: 0, thi: 0 }
+          },
+          actions: { dung: 0, saltpeter: 0, water: 0, oxygen: 0, sunlight: null },
+          conversions: [ ]
+        }),
+        conversions: [
+          { condition: "H2O > 79", transform: "10 Nit -> 3.33 Asc", void: false },
+          { condition: "Oxy < 49", transform: "10 Car -> 5 Asc",    void: false },
+          { condition: "Sun > 69", transform: "10 Fol -> 20 Asc",   void: false },
+          { condition: "Sun < 20", transform: "10 Pot -> 2.5 Bio",  void: false },
+          { condition: "H2O < 29", transform: "10 Asc -> 20 Bio",   void: false },
+          { condition: "Oxy > 89", transform: "10 Pyr -> 10 Bio",   void: false },
+          { condition: "Oxy > 69", transform: "10 Pot -> 3.33 Car", void: false },
+          { condition: "Sun > 79", transform: "10 Asc -> 10 Car",   void: false },
+          { condition: "H2O < 39", transform: "10 Thi -> 20 Car",   void: false },
+          { condition: "Sun > 69", transform: "10 Pot -> 2.5 Fol",  void: false },
+          { condition: "H2O < 59", transform: "10 Nia -> 30 Fol",   void: false },
+          { condition: "Oxy < 49", transform: "10 Thi -> 20 Fol",   void: false },
+          { condition: "Sun < 20", transform: "10 Asc -> 20 Nia",   void: false },
+          { condition: "H2O > 69", transform: "10 Pyr -> 5 Nia",    void: false },
+          { condition: "Oxy < 39", transform: "10 Thi -> 10 Nia",   void: false },
+          { condition: "H2O < 39", transform: "10 Nit -> 3.33 Pyr", void: false },
+          { condition: "Sun > 59", transform: "10 Car -> 10 Pyr",   void: false },
+          { condition: "Oxy > 79", transform: "10 Fol -> 20 Pyr",   void: false },
+          { condition: "Sun < 40", transform: "10 Asc -> 10 Thi",   void: false },
+          { condition: "Oxy < 49", transform: "10 Car -> 20 Thi",   void: false },
+          { condition: "H2O < 49", transform: "10 Nia -> 5 Thi",    void: false }
+        ],
+        goal: { },
+        ux: {
+          highlighting: 0,
+          actionsWritable: true 
+        }
+      };
+
+      function thistleApp(state = initialState, action) {
+        console.log(action.type);
+        switch(action.type) {
+          case 'TOGGLE_VOID':
+            return _.assign({}, state, {
+              conversions: _.map(state.conversions, function(c) {
+                if (c.transform === action.conversion_key) {
+                  return _.assign({}, c, { void: !c.void });
+                } else {
+                  return c;
+                }
+              })
+            });
+          case 'INPUT_ACTION':
+            return _.assign({}, state, {
+              ticks: _.map(state.ticks, (t, i) => {
+                if (i == action.index) {
+                  return _.assign({}, t, { actions: _.assign({}, t.actions, { [action.action]: action.value } ) })
+                } else {
+                  return t
+                }
+              })
+            })
+          case 'TOGGLE_DAYLIGHT':
+          return _.assign({}, state, {
+            daylight: action.daylight,
+            ticks: _.map(state.ticks, (tick, index) => {
+              if (index === 0 && _.isNull(tick.actions.sunlight)) {
+                return _.assign({}, tick, {
+                  actions: _.assign({}, tick.actions, { sunlight: action.daylight == 'daytime' ? 99 : 0 })
+                })
+              }
+              return tick
+            })
+          })
+          case 'RUN_RECIPE':
+            const ticks = _.reduce(state.ticks, (memo, tick) => {
+              var newTick = _.assign({}, tick)
+              let inputsForTick
+              if (_.isEmpty(memo)) {
+                newTick.resources = _.assign({}, newTick.resources, {
+                  inputs: _.assign({}, newTick.resources.inputs, {
+                    sun: tick.actions.sunlight || (state.daylight == 'daytime' ? 99 : 0)
+                  })
+                })
+                inputsForTick = {
+                  nit: Math.min(99, tick.resources.inputs.nit + tick.actions.dung * 20),
+                  pot: Math.min(99, tick.resources.inputs.pot + tick.actions.saltpeter * 20),
+                  h2o: Math.min(99, tick.resources.inputs.h2o + tick.actions.water * 20),
+                  oxy: Math.min(99, tick.resources.inputs.oxy + tick.actions.oxygen * 20),
+                  sun: tick.actions.sunlight || (state.daylight == 'daytime' ? 99 : 0)
+                }
+              } else {
+                const previousTick = _.assign({}, _.last(memo))
+                const minusTen = (num) => { return Math.max(0, num - 10) }
+                const plusAction = (num, action) => { return Math.min(99, num + previousTick.actions[action] * 20) }
+
+                const convertVitamins = () => {
+                  let resources = _.assign({}, previousTick.resources, {
+                    inputs: _.assign({}, previousTick.resources.inputs),
+                    vitamins: _.assign({}, previousTick.resources.vitamins)
+                  })
+
+                  _.each(previousTick.conversions, (conversion) => {
+                    const md = conversion.transform.match(/([\d\.]+) (\w+) -> ([\d\.]+) (\w+)/)
+                    const srcAmt = parseFloat(md[1])
+                    const srcRes = md[2].toLowerCase()
+                    const dstAmt = parseFloat(md[3])
+                    const dstRes = md[4].toLowerCase()
+                    const srcResType = _.has(previousTick.resources.inputs, srcRes) ? 'inputs' : 'vitamins'
+
+                    const usedRes = Math.min(srcAmt, previousTick.resources[srcResType][srcRes])
+                    resources.vitamins[dstRes] = Math.min(99, resources.vitamins[dstRes] + usedRes * (dstAmt/srcAmt))
+                    resources[srcResType][srcRes] = Math.max(0, resources[srcResType][srcRes] - usedRes)
+                  })
+
+                  resources.inputs.nit = minusTen(plusAction(previousTick.resources.inputs.nit, 'dung')),
+                  resources.inputs.pot = minusTen(plusAction(previousTick.resources.inputs.pot, 'saltpeter')),
+                  resources.inputs.h2o = minusTen(plusAction(previousTick.resources.inputs.h2o, 'water')),
+                  resources.inputs.oxy = minusTen(plusAction(previousTick.resources.inputs.oxy, 'oxygen')),
+                  resources.inputs.sun = previousTick.actions.sunlight || previousTick.resources.inputs.sun
+
+                  return resources
+                }
+
+                newTick.resources = convertVitamins()
+                inputsForTick = {
+                  nit: Math.min(99, newTick.resources.inputs.nit + tick.actions.dung * 20),
+                  pot: Math.min(99, newTick.resources.inputs.pot + tick.actions.saltpeter * 20),
+                  h2o: Math.min(99, newTick.resources.inputs.h2o + tick.actions.water * 20),
+                  oxy: Math.min(99, newTick.resources.inputs.oxy + tick.actions.oxygen * 20),
+                  sun: tick.actions.sunlight || previousTick.resources.inputs.sun
+                }
+              }
+              newTick.conversions = _.filter(state.conversions, (conversion) => {
+                if (conversion.void) { return false }
+                const md = conversion.condition.match(/(\w+) ([><]) (\d+)/)
+                let res = md[1].toLowerCase()
+                let op = md[2]
+                let amt = parseInt(md[3])
+
+              //const tMd = conversion.transform.match(/([\d\.]+) (\w+) -> ([\d\.]+) (\w+)/)
+              //const srcAmt = parseFloat(tMd[1])
+              //const srcRes = tMd[2].toLowerCase()
+
+              //if ((newTick.resources.inputs[srcRes] <= 0) || (newTick.resources.vitamins[srcRes] <= 0)) {
+              //  return false
+              //}
+                if (op == '<') {
+                  return inputsForTick[res] < amt
+                } else if (op == '>') {
+                  return inputsForTick[res] > amt
+                }
+              })
+              memo.push(newTick)
+              return memo
+            }, [])
+            return _.assign({}, state, { ticks })
+          case 'SET_GOAL':
+            return _.assign({}, state, { goal: action.goal })
+          case 'UX_TOGGLE_ACTIONS_WRITABLE':
+            return _.assign({}, state, {
+              ux: _.assign({}, state.ux, {
+                actionsWritable: !state.ux.actionsWritable
+              })
+            })
+          case 'UX_HOVER_TICK':
+            const keys = _.map(state.ticks[action.index].conversions, 'transform')
+            return _.assign({}, state, {
+              ux: _.assign({}, state.ux, {
+                highlighting: action.index
+              }),
+              conversions: _.map(state.conversions, (conversion) => {
+                return _.assign({}, conversion, {
+                  highlight: _.includes(keys, conversion.transform)
+                })
+              })
+            })
+          default:
+            return state;
+        }
+      }
+
+      let store = Redux.createStore(thistleApp);
+
+      class Conversion extends React.Component {
+        constructor(props) {
+          super(props);
+          this.toggleVoid = this.toggleVoid.bind(this);
+        }
+
+        toggleVoid() {
+          this.props.onVoidToggled(this.props.transform)
+        }
+
+        render() {
+          var className = [ 'conversion' ];
+          if (this.props.void) { className.push('void'); }
+          if (this.props.highlight) { className.push('highlight'); }
+          return <div className={className.join(' ')} onClick={this.toggleVoid}>
+            <div className="condition">{this.props.condition}</div>
+            <div className="transform">{this.props.transform}</div>
+          </div>;
+        }
+      }
+
+      const mapStateToPropsForConversion = (state) => { return state }
+      const mapDispatchToPropsForConversion = (dispatch) => {
+        return {
+          onVoidToggled: (key) => {
+            dispatch({ type: TOGGLE_VOID, conversion_key: key })
+            dispatch({ type: RUN_RECIPE })
+          }
+        }
+      }
+      const ConversionApp = ReactRedux.connect(
+        mapStateToPropsForConversion,
+        mapDispatchToPropsForConversion
+      )(Conversion)
+
+      class ConversionTable extends React.Component {
+        render() {
+          const allTheConversions = this.props.conversions.map((conversion) =>
+            <ConversionApp
+              key={conversion.transform.replace(/[\s\d\.]+/g, '')}
+              condition={conversion.condition}
+              transform={conversion.transform}
+              highlight={conversion.highlight}
+              void={conversion.void} />
+          );
+          return <div className="conversionTable">
+            {allTheConversions}
+          </div>;
+        }
+      }
+
+      const mapStateToPropsForConversionTable = (state) => { return state }
+      const ConversionTableApp = ReactRedux.connect(mapStateToPropsForConversionTable)(ConversionTable)
+
+      class Input extends React.Component {
+        render() {
+          return <td>{this.props.value}</td>;
+        }
+      }
+
+      class ResourceVitamin extends React.Component {
+        render() {
+          const round = (num) => {
+            return parseInt((num.toString().split('.')[1] || '0')[0]) > 5 ? Math.ceil(num) : Math.floor(num)
+          }
+          return <td title={this.props.value}>{round(this.props.value)}</td>;
+        }
+      }
+
+      class Thistle extends React.Component {
+        render() {
+          const asVitamin = (num) => {
+            if (num <= 20) {
+              return '-'
+            } else if (num <= 80) {
+              return '~'
+            } else {
+              return '+'
+            }
+          }
+          const vitaminSpan = (initial, amount, goal = null) => {
+            let className = []
+            if (goal) {
+              if (goal == amount) {
+                className = 'meetsGoal'
+              } else {
+                className = 'failsGoal'
+              }
+            }
+            return <span className={className}>
+              {initial}{amount}
+            </span>;
+          }
+          return <span className="thistleVitamin">
+            {vitaminSpan('A', asVitamin(this.props.value.asc), this.props.goal.asc)}
+            {vitaminSpan('B', asVitamin(this.props.value.bio), this.props.goal.bio)}
+            {vitaminSpan('C', asVitamin(this.props.value.car), this.props.goal.car)}
+            {vitaminSpan('F', asVitamin(this.props.value.fol), this.props.goal.fol)}
+            {vitaminSpan('N', asVitamin(this.props.value.nia), this.props.goal.nia)}
+            {vitaminSpan('P', asVitamin(this.props.value.pyr), this.props.goal.pyr)}
+            {vitaminSpan('T', asVitamin(this.props.value.thi), this.props.goal.thi)}
+          </span>;
+        }
+      }
+
+      class Tick extends React.Component {
+        constructor(props) {
+          super(props);
+
+          _.bindAll(this, [
+            'handleInputAction',
+            'inputAction',
+            'sunlightInputAction',
+            'hoverTick'
+          ])
+        }
+
+        handleInputAction(e) {
+          this.props.onInputAction(this.props.index, e.target.name, e.target.valueAsNumber)
+        }
+
+        hoverTick(e) {
+          this.props.onHover(this.props.index);
+        }
+
+        inputAction(note, input) {
+          if (this.props.ux.actionsWritable) {
+            const mapping = {
+              dung: 'nit',
+              saltpeter: 'pot',
+              water: 'h2o',
+              oxygen: 'oxy'
+            };
+            const maxActions = Math.ceil((99 - this.props.tick.resources.inputs[mapping[input]]) / 20);
+            return <span>
+              {note}
+              <input name={input} type="number"
+                value={this.props.tick.actions[input]}
+                defaultValue="0" min="0" max={maxActions} step="1"
+                onChange={this.handleInputAction} />
+            </span>;
+          } else if (this.props.tick.actions[input]) {
+            return `${note}${this.props.tick.actions[input]}`
+          }
+        }
+
+        sunlightInputAction() {
+          var sunValues = {};
+          switch(this.props.daylight) {
+            case 'nighttime':
+              sunValues.defaultValue = 0;
+              sunValues.step = 0;
+              sunValues.min = 0;
+              sunValues.max = 0;
+              break;
+            case 'daytime':
+              sunValues.defaultValue = 99;
+              sunValues.step = 66;
+              sunValues.min = 33;
+              sunValues.max = 99;
+              break;
+          }
+          if (this.props.ux.actionsWritable) {
+            const value = this.props.tick.actions.sunlight ||
+              this.props.tick.resources.inputs.sun || sunValues.defaultValue
+            return <span>
+              s
+              <input name="sunlight" type="number" value={value}
+                min={sunValues.min} max={sunValues.max} step={sunValues.step}
+                onChange={this.handleInputAction} />
+            </span>;
+          } else if (this.props.tick.actions.sunlight) {
+            return `s${this.props.tick.actions.sunlight}`
+          }
+        }
+
+        inputsWithActions() {
+          return {
+            nit: Math.min(99, this.props.tick.resources.inputs.nit + this.props.tick.actions.dung * 20),
+            pot: Math.min(99, this.props.tick.resources.inputs.pot + this.props.tick.actions.saltpeter * 20),
+            h2o: Math.min(99, this.props.tick.resources.inputs.h2o + this.props.tick.actions.water * 20),
+            oxy: Math.min(99, this.props.tick.resources.inputs.oxy + this.props.tick.actions.oxygen * 20),
+            sun: this.props.tick.actions.sunlight || this.props.tick.resources.inputs.sun
+          };
+        }
+
+        render() {
+          const computedInputs = this.inputsWithActions();
+          const computedOutputs = _.assign({}, this.props.tick.resources.vitamins);
+          let classes = ['tick']
+          if (this.props.index == this.props.ux.highlighting) { classes.push('highlight') }
+          return <tr className={classes.join(' ')} title={JSON.stringify(this.props.tick)} onMouseEnter={this.hoverTick}>
+            <td className="datum">{this.props.index}</td>
+            <td className="tickActions">
+              {this.inputAction('n', 'dung')}
+              {this.inputAction('p', 'saltpeter')}
+              {this.inputAction('w', 'water')}
+              {this.inputAction('o', 'oxygen')}
+              {this.sunlightInputAction()}
+            </td>
+            <Input value={computedInputs.nit} />
+            <Input value={computedInputs.pot} />
+            <Input value={computedInputs.h2o} />
+            <Input value={computedInputs.oxy} />
+            <Input value={computedInputs.sun} />
+            <td className="spacer">&nbsp;</td>
+            <ResourceVitamin value={computedOutputs.asc} />
+            <ResourceVitamin value={computedOutputs.bio} />
+            <ResourceVitamin value={computedOutputs.car} />
+            <ResourceVitamin value={computedOutputs.fol} />
+            <ResourceVitamin value={computedOutputs.nia} />
+            <ResourceVitamin value={computedOutputs.pyr} />
+            <ResourceVitamin value={computedOutputs.thi} />
+            <td className="spacer">&nbsp;</td>
+            <td><Thistle value={computedOutputs} goal={this.props.goal} /></td>
+          </tr>;
+        }
+      }
+
+      const TickApp = ReactRedux.connect(
+        (state) => { return state },
+        (dispatch) => {
+          return {
+            onInputAction: (index, action, value) => {
+              dispatch({ type: 'INPUT_ACTION', index, action, value })
+              dispatch({ type: 'RUN_RECIPE' })
+            },
+            onHover: (index) => {
+              dispatch({ type: 'UX_HOVER_TICK', index })
+            }
+          }
+        }
+      )(Tick)
+
+      class ToggleActionsWritable extends React.Component {
+        render() {
+          return <button onClick={this.props.toggle}>Toggle</button>
+        }
+      }
+
+      const ToggleActionsWritableButton = ReactRedux.connect(
+        (state) => { return state },
+        (dispatch) => {
+          return {
+            toggle: () => {
+              dispatch({ type: 'UX_TOGGLE_ACTIONS_WRITABLE' })
+            }
+          }
+        },
+      )(ToggleActionsWritable)
+
+      class RecipeRun extends React.Component {
+        render() {
+          const ticks = this.props.ticks.map((tick, i) =>
+            <TickApp key={i} index={i} tick={tick} />
+          )
+          return <table className="recipeRun">
+            <thead><tr>
+              <th>Tick</th>
+              <th>Actions <ToggleActionsWritableButton /></th>
+              <th>Nit</th>
+              <th>Pot</th>
+              <th>H2o</th>
+              <th>Oxy</th>
+              <th>Sun</th>
+              <th>&nbsp;</th>
+              <th>Asc</th>
+              <th>Bio</th>
+              <th>Car</th>
+              <th>Fol</th>
+              <th>Nia</th>
+              <th>Pyr</th>
+              <th>Thi</th>
+            </tr></thead>
+            <tbody>
+              {ticks}
+            </tbody>
+          </table>
+        }
+      }
+
+      const RecipeRunApp = ReactRedux.connect(
+        (state) => { return state }
+      )(RecipeRun)
+
+      class Recipe extends React.Component {
+        render() {
+          const recipe = _.compact(_.map(this.props.ticks, (tick, index) => {
+            const instructions = _.map(tick.actions, (value, type) => {
+              if (value > 0) {
+                let indicator
+                switch(type) {
+                  case 'dung':      indicator = 'n'; break
+                  case 'saltpeter': indicator = 'p'; break
+                  case 'water':     indicator = 'w'; break
+                  case 'oxygen':    indicator = 'o'; break
+                  case 'sunlight':  indicator = 's'; break
+                }
+                return indicator + value.toString()
+              }
+            }).join('')
+            if (instructions) {
+              return `t${index}:${instructions}`
+            } else {
+              return null;
+            }
+          })).join(' ')
+          return <div id="simRecipe">
+            Recipe: <br />
+            <input type="text" value={recipe} />
+          </div>;
+        }
+      }
+
+      const RecipeDisplay = ReactRedux.connect(
+        (state) => { return state }
+      )(Recipe)
+
+      class Goal extends React.Component {
+        constructor(props) {
+          super(props)
+
+          _.bindAll(this, [
+            'parseGoal'
+          ])
+        }
+
+        parseGoal(e) {
+          const matches = e.target.value.match(/[ABCFNPT][\+\-~]/g)
+          let goal = {}
+          _.each(matches, (match) => {
+            switch(match[0]) {
+              case 'A': goal.asc = match[1]; break;
+              case 'B': goal.bio = match[1]; break;
+              case 'C': goal.car = match[1]; break;
+              case 'F': goal.fol = match[1]; break;
+              case 'N': goal.nia = match[1]; break;
+              case 'P': goal.pyr = match[1]; break;
+              case 'T': goal.thi = match[1]; break;
+            }
+          })
+          this.props.goalUpdate(goal)
+        }
+
+        render() {
+          return <div id="simGoal">
+            Goal: <br />
+            <input type="text" onBlur={this.parseGoal} />
+          </div>;
+        }
+      }
+
+      const GoalInput = ReactRedux.connect(
+        null,
+        (dispatch) => {
+          return {
+            goalUpdate: (goal) => {
+              dispatch({ type: 'SET_GOAL', goal })
+              dispatch({ type: 'RUN_RECIPE' })
+            }
+          }
+        }
+      )(Goal)
+
+      class ThistleApp extends React.Component {
+        render() {
+          return <div id="app">
+            <div id="sidebar">
+              <ConversionTableApp />
+              <RecipeDisplay />
+              <GoalInput />
+            </div>
+            <RecipeRunApp />
+          </div>;
+        }
+      }
+
+      ReactRedux.connect()(ThistleApp);
+
+      ReactDOM.render(
+        <ReactRedux.Provider store={store}>
+          <ThistleApp />
+        </ReactRedux.Provider> ,
+        document.getElementById('root')
+      );
+
+      store.dispatch({ type: 'TOGGLE_DAYLIGHT', daylight: 'daytime' })
+      store.dispatch({ type: 'RUN_RECIPE' })
+
+    </script>
+  </body>
+</html>
