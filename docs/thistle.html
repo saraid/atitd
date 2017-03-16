@@ -63,6 +63,9 @@
         text-align: center;
         width: 200px;
       }
+      .tickActions.noWrite {
+        text-align: left;
+      }
       .thistleVitamin {
         font-family: monospace;
       }
@@ -269,9 +272,32 @@
               return memo.concat(newTick)
             }, [])
             return _.assign({}, state, { ticks })
+          case 'SET_RECIPE':
+            const parts = action.recipe.split(' ')
+            var newTicks = _.map(state.ticks, _.identity)
+            _.each(parts, (part) => {
+              const partpart = part.split(':')
+              const tickIndex = parseInt(partpart[0].substr(1))
+              const actions = partpart[1].match(/\w\d+/g)
+              _.each(actions, (action) => {
+                const actionType = {
+                  n: 'dung',
+                  p: 'saltpeter',
+                  w: 'water',
+                  o: 'oxygen',
+                  s: 'sunlight',
+                }[action[0]]
+                const actionValue = parseInt(action.substr(1))
+
+                newTicks[tickIndex] = _.assign({}, newTicks[tickIndex], {
+                  actions: _.assign({}, newTicks[tickIndex].actions, { [actionType]: actionValue })
+                })
+              })
+            })
+            return _.assign({}, state, { ticks: newTicks })
           case 'SET_GOAL':
             const matches = action.goal.match(/[ABCFNPT][\+\-~]/g)
-            let goal = {}
+            let goal = { raw: action.goal }
             _.each(matches, (match) => {
               switch(match[0]) {
                 case 'A': goal.asc = match[1]; break;
@@ -500,9 +526,13 @@
           const computedOutputs = _.assign({}, this.props.tick.resources.vitamins);
           let classes = ['tick']
           if (this.props.index == this.props.ux.highlighting) { classes.push('highlight') }
+
+          const tickActionsClasses = [ 'tickActions' ]
+          if (!this.props.actionsWritable) { tickActionsClasses.push('noWrite') }
+
           return <tr className={classes.join(' ')} title={JSON.stringify(this.props.tick)} onMouseEnter={this.hoverTick}>
             <td className="datum">{this.props.index}</td>
-            <td className="tickActions">
+            <td className={tickActionsClasses.join(' ')}>
               {this.inputAction('n', 'dung')}
               {this.inputAction('p', 'saltpeter')}
               {this.inputAction('w', 'water')}
@@ -617,15 +647,25 @@
               return null;
             }
           })).join(' ')
+
           return <div id="simRecipe">
             Recipe: <br />
-            <input type="text" value={recipe} />
+            <input id="simRecipeDisplay" defaultValue={this.props.placeholder} type="text"
+              value={recipe} onChange={(e) => {this.props.updateRecipe(e.target.value)}} />
           </div>;
         }
       }
 
       const RecipeDisplay = ReactRedux.connect(
-        (state) => { return state }
+        (state) => { return state },
+        (dispatch) => {
+          return {
+            updateRecipe: (recipe) => {
+              dispatch({ type: 'SET_RECIPE', recipe })
+              dispatch({ type: 'RUN_RECIPE' })
+            }
+          }
+        }
       )(Recipe)
 
       class Goal extends React.Component {
@@ -644,13 +684,13 @@
         render() {
           return <div id="simGoal">
             Goal: <br />
-            <input placeholder={this.props.placeholder} type="text" onChange={this.parseGoal} />
+            <input defaultValue={this.props.placeholder} type="text" onChange={this.parseGoal} />
           </div>;
         }
       }
 
       const GoalInput = ReactRedux.connect(
-        (state) => { return { placeholder: _.get(state, 'ux.urlParams.goal') } },
+        (state) => { return { goal: _.get(state, 'goal.raw'), placeholder: _.get(state, 'ux.urlParams.goal') } },
         (dispatch) => {
           return {
             goalUpdate: (goal) => {
@@ -698,6 +738,22 @@
         }
       )(Daylight)
 
+      class Permalink extends React.Component {
+        render() {
+          let url = window.location.pathname.substr(0)
+          let query = _.compact(_.map({
+            goal: _.get(this.props, 'goal.raw'),
+            recipe: _.get(document.getElementById('simRecipeDisplay'), 'value'),
+            voids: _.map(_.filter(this.props.conversions, (c) => { return c.void }), 'key').join(',')
+          }, (v, k) => { if (!_.isEmpty(v)) { return `${k}=${v}` } })).join('&')
+          return <a href={url+'?'+query}>Permalink</a>
+        }
+      }
+
+      const PermalinkDisplay = ReactRedux.connect(
+        (state) => { return state }
+      )(Permalink)
+
       class ThistleApp extends React.Component {
         render() {
           return <div id="app">
@@ -706,6 +762,7 @@
               <RecipeDisplay />
               <DaylightToggle />
               <GoalInput />
+              <PermalinkDisplay />
             </div>
             <RecipeRunApp />
           </div>;
@@ -713,13 +770,6 @@
       }
 
       ReactRedux.connect()(ThistleApp);
-
-      ReactDOM.render(
-        <ReactRedux.Provider store={store}>
-          <ThistleApp />
-        </ReactRedux.Provider> ,
-        document.getElementById('root')
-      );
 
       store.dispatch({ type: 'TOGGLE_DAYLIGHT', daylight: 'daytime' })
 
@@ -738,6 +788,8 @@
               store.dispatch({ type: 'READ_URL_PARAMS', key, value })
               break;
             case 'recipe':
+              store.dispatch({ type: 'SET_RECIPE', recipe: value })
+              store.dispatch({ type: 'READ_URL_PARAMS', key, value })
               break;
             case 'voids':
               _.each(value.split(','), (cvoid) => {
@@ -748,6 +800,13 @@
         })
       }
       store.dispatch({ type: 'RUN_RECIPE' })
+
+      ReactDOM.render(
+        <ReactRedux.Provider store={store}>
+          <ThistleApp />
+        </ReactRedux.Provider> ,
+        document.getElementById('root')
+      );
 
     </script>
   </body>
