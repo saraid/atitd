@@ -174,17 +174,27 @@
               })
             })
           case 'TOGGLE_DAYLIGHT':
-          return _.assign({}, state, {
-            daylight: action.daylight,
-            ticks: _.map(state.ticks, (tick, index) => {
-              if (index === 0 && _.isNull(tick.actions.sunlight)) {
-                return _.assign({}, tick, {
-                  actions: _.assign({}, tick.actions, { sunlight: action.daylight == 'daytime' ? 99 : 0 })
-                })
-              }
-              return tick
+            return _.assign({}, state, {
+              daylight: action.daylight,
+              ticks: _.map(state.ticks, (tick, index) => {
+                if (index === 0) {
+                  let sunlight
+                  if (action.daylight == 'daytime') {
+                    if (_.isNull(tick.actions.sunlight) || tick.actions.sunlight === 0) {
+                      sunlight = 99
+                    } else {
+                      return tick
+                    }
+                  } else {
+                    sunlight = 0
+                  }
+                  return _.assign({}, tick, {
+                    actions: _.assign({}, tick.actions, { sunlight })
+                  })
+                }
+                return tick
+              })
             })
-          })
           case 'RUN_RECIPE':
             const ticks = _.reduce(state.ticks, (memo, tick) => {
               var newTick = _.assign({}, tick)
@@ -589,7 +599,7 @@
         render() {
           const recipe = _.compact(_.map(this.props.ticks, (tick, index) => {
             const instructions = _.map(tick.actions, (value, type) => {
-              if (value > 0) {
+              if (value > 0 || (type == 'sunlight' && !_.isNull(value)) ) {
                 let indicator
                 switch(type) {
                   case 'dung':      indicator = 'n'; break
@@ -628,19 +638,19 @@
         }
 
         parseGoal(e) {
-          this.props.goalUpdate(e.target.value)
+          this.props.goalUpdate(e.target.value || this.props.placeholder)
         }
 
         render() {
           return <div id="simGoal">
             Goal: <br />
-            <input placeholder={this.props.text} type="text" onChange={this.parseGoal} />
+            <input placeholder={this.props.placeholder} type="text" onChange={this.parseGoal} />
           </div>;
         }
       }
 
       const GoalInput = ReactRedux.connect(
-        (state) => { return { text: _.get(state, 'ux.urlParams.goal') } },
+        (state) => { return { placeholder: _.get(state, 'ux.urlParams.goal') } },
         (dispatch) => {
           return {
             goalUpdate: (goal) => {
@@ -651,12 +661,50 @@
         }
       )(Goal)
 
+      class Daylight extends React.Component {
+        constructor(props) {
+          super(props)
+          _.bindAll(this, ['toggleDaylight'])
+        }
+
+        toggleDaylight() {
+          if (this.props.daylight == 'daytime') {
+            this.props.toggleDaylight('nighttime')
+          } else {
+            this.props.toggleDaylight('daytime')
+          }
+        }
+
+        render() {
+          return <div onClick={this.toggleDaylight}>
+            Toggle Daylight: 
+            <button>
+              { this.props.daylight == 'daytime' && '☀️' }
+              { this.props.daylight == 'nighttime' && '🌑' }
+            </button>
+          </div>;
+        }
+      }
+
+      const DaylightToggle = ReactRedux.connect(
+        (state) => { return { daylight: state.daylight } },
+        (dispatch) => {
+          return {
+            toggleDaylight: (daylight) => {
+              dispatch({ type: 'TOGGLE_DAYLIGHT', daylight })
+              dispatch({ type: 'RUN_RECIPE' })
+            }
+          }
+        }
+      )(Daylight)
+
       class ThistleApp extends React.Component {
         render() {
           return <div id="app">
             <div id="sidebar">
               <ConversionTableApp />
               <RecipeDisplay />
+              <DaylightToggle />
               <GoalInput />
             </div>
             <RecipeRunApp />
@@ -681,6 +729,10 @@
           const value = part.split('=')[1]
 
           switch(key) {
+            case 'daylight':
+              store.dispatch({ type: 'TOGGLE_DAYLIGHT', daylight: value })
+              store.dispatch({ type: 'READ_URL_PARAMS', key, value })
+              break;
             case 'goal':
               store.dispatch({ type: 'SET_GOAL', goal: value })
               store.dispatch({ type: 'READ_URL_PARAMS', key, value })
