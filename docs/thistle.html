@@ -435,7 +435,7 @@
         }
 
         inputAction(note, input) {
-          if (this.props.ux.actionsWritable) {
+          if (this.props.ux.actionsWritable && this.props.index !== 40) {
             const mapping = {
               dung: 'nit',
               saltpeter: 'pot',
@@ -471,7 +471,7 @@
               sunValues.max = 99;
               break;
           }
-          if (this.props.ux.actionsWritable) {
+          if (this.props.ux.actionsWritable && this.props.index !== 40) {
             const value = this.props.tick.actions.sunlight ||
               this.props.tick.resources.inputs.sun || sunValues.defaultValue
             return <span>
