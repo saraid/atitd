@@ -742,6 +742,7 @@
         render() {
           let url = window.location.pathname.substr(0)
           let query = _.compact(_.map({
+            daylight: _.get(this.props, 'daylight'),
             goal: _.get(this.props, 'goal.raw'),
             recipe: _.get(document.getElementById('simRecipeDisplay'), 'value'),
             voids: _.map(_.filter(this.props.conversions, (c) => { return c.void }), 'key').join(',')
