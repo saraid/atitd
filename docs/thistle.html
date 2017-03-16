@@ -223,7 +223,7 @@
                   pot: Math.min(99, newTick.resources.inputs.pot + tick.actions.saltpeter * 20),
                   h2o: Math.min(99, newTick.resources.inputs.h2o + tick.actions.water * 20),
                   oxy: Math.min(99, newTick.resources.inputs.oxy + tick.actions.oxygen * 20),
-                  sun: tick.actions.sunlight || previousTick.resources.inputs.sun
+                  sun: tick.actions.sunlight || newTick.resources.inputs.sun
                 }
               }
 
@@ -674,7 +674,6 @@
       );
 
       store.dispatch({ type: 'TOGGLE_DAYLIGHT', daylight: 'daytime' })
-      store.dispatch({ type: 'RUN_RECIPE' })
 
       if (!_.isEmpty(window.location.search)) {
         _.each(decodeURIComponent(window.location.search.substr(1)).split('&'), (part) => {
@@ -696,6 +695,7 @@
           }
         })
       }
+      store.dispatch({ type: 'RUN_RECIPE' })
 
     </script>
   </body>
