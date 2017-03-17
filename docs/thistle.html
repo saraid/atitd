@@ -209,10 +209,10 @@
                   })
                 })
                 inputsForTick = {
-                  nit: Math.min(99.99, tick.resources.inputs.nit + tick.actions.dung * 20),
-                  pot: Math.min(99.99, tick.resources.inputs.pot + tick.actions.saltpeter * 20),
-                  h2o: Math.min(99.99, tick.resources.inputs.h2o + tick.actions.water * 20),
-                  oxy: Math.min(99.99, tick.resources.inputs.oxy + tick.actions.oxygen * 20),
+                  nit: Math.min(99, tick.resources.inputs.nit + tick.actions.dung * 20),
+                  pot: Math.min(99, tick.resources.inputs.pot + tick.actions.saltpeter * 20),
+                  h2o: Math.min(99, tick.resources.inputs.h2o + tick.actions.water * 20),
+                  oxy: Math.min(99, tick.resources.inputs.oxy + tick.actions.oxygen * 20),
                   sun: tick.actions.sunlight || (state.daylight == 'daytime' ? 99 : 0)
                 }
               } else {
@@ -232,10 +232,10 @@
                   })
                 )
                 inputsForTick = {
-                  nit: Math.min(99.99, newTick.resources.inputs.nit + tick.actions.dung * 20),
-                  pot: Math.min(99.99, newTick.resources.inputs.pot + tick.actions.saltpeter * 20),
-                  h2o: Math.min(99.99, newTick.resources.inputs.h2o + tick.actions.water * 20),
-                  oxy: Math.min(99.99, newTick.resources.inputs.oxy + tick.actions.oxygen * 20),
+                  nit: Math.min(99, newTick.resources.inputs.nit + tick.actions.dung * 20),
+                  pot: Math.min(99, newTick.resources.inputs.pot + tick.actions.saltpeter * 20),
+                  h2o: Math.min(99, newTick.resources.inputs.h2o + tick.actions.water * 20),
+                  oxy: Math.min(99, newTick.resources.inputs.oxy + tick.actions.oxygen * 20),
                   sun: tick.actions.sunlight || newTick.resources.inputs.sun
                 }
               }
@@ -391,7 +391,7 @@
 
       class Input extends React.Component {
         render() {
-          return <td>{this.props.value}</td>;
+          return <td>{Math.floor(this.props.value)}</td>;
         }
       }
 
@@ -747,7 +747,8 @@
             recipe: _.get(document.getElementById('simRecipeDisplay'), 'value'),
             voids: _.map(_.filter(this.props.conversions, (c) => { return c.void }), 'key').join(',')
           }, (v, k) => { if (!_.isEmpty(v)) { return `${k}=${v}` } })).join('&')
-          return <a href={url+'?'+query}>Permalink</a>
+          let hash = encodeURIComponent(btoa(query))
+          return <a href={url+'#'+hash}>Permalink</a>
         }
       }
 
@@ -774,8 +775,12 @@
 
       store.dispatch({ type: 'TOGGLE_DAYLIGHT', daylight: 'daytime' })
 
-      if (!_.isEmpty(window.location.search)) {
-        _.each(decodeURIComponent(window.location.search.substr(1)).split('&'), (part) => {
+      let urlParams
+      if (!_.isEmpty(window.location.search)) { urlParams = decodeURIComponent(window.location.search.substr(1)) }
+      else if (!_.isEmpty(window.location.hash)) { urlParams = atob(decodeURIComponent(window.location.hash.substr(1))) }
+
+      if (urlParams) {
+        _.each(urlParams.split('&'), (part) => {
           const key = part.split('=')[0]
           const value = part.split('=')[1]
 
