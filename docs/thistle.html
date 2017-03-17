@@ -13,6 +13,8 @@
       #sidebar {
         position: fixed;
         right: 0;
+        margin-right: 2em;
+        width: 384px;
       }
       .conversionTable {
         min-width: 369px;
@@ -38,6 +40,10 @@
       }
       .conversionTable .conversion.highlight {
         background-color: limegreen;
+      }
+
+      #links {
+        text-align: right;
       }
 
       #simRecipe, #simGoal {
@@ -761,6 +767,10 @@
           return <div id="app">
             <div id="sidebar">
               <ConversionTableApp />
+              <div id="links">
+                <a href="http://www.atitd.org/wiki/tale7/Thistle_Guide">Thistle Guide</a><br />
+                <a href="http://www.atitd.org/wiki/tale6/Guilds/Twisted_Thistle/Voidlist">Voidlist</a>
+              </div>
               <RecipeDisplay />
               <DaylightToggle />
               <GoalInput />
