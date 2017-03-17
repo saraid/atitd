@@ -139,7 +139,7 @@
         }
 
         const usedRes = Math.min(srcAmt, previousResources[srcResType][srcRes])
-        newResources.vitamins[dstRes] = Math.min(99, newResources.vitamins[dstRes] + usedRes * (dstAmt/srcAmt))
+        newResources.vitamins[dstRes] = Math.min(99.99, newResources.vitamins[dstRes] + usedRes * (dstAmt/srcAmt))
         newResources[srcResType][srcRes] = Math.max(0, newResources[srcResType][srcRes] - usedRes)
 
         return newResources
@@ -209,16 +209,16 @@
                   })
                 })
                 inputsForTick = {
-                  nit: Math.min(99, tick.resources.inputs.nit + tick.actions.dung * 20),
-                  pot: Math.min(99, tick.resources.inputs.pot + tick.actions.saltpeter * 20),
-                  h2o: Math.min(99, tick.resources.inputs.h2o + tick.actions.water * 20),
-                  oxy: Math.min(99, tick.resources.inputs.oxy + tick.actions.oxygen * 20),
+                  nit: Math.min(99.99, tick.resources.inputs.nit + tick.actions.dung * 20),
+                  pot: Math.min(99.99, tick.resources.inputs.pot + tick.actions.saltpeter * 20),
+                  h2o: Math.min(99.99, tick.resources.inputs.h2o + tick.actions.water * 20),
+                  oxy: Math.min(99.99, tick.resources.inputs.oxy + tick.actions.oxygen * 20),
                   sun: tick.actions.sunlight || (state.daylight == 'daytime' ? 99 : 0)
                 }
               } else {
                 const previousTick = _.assign({}, _.last(memo))
                 const minusTen = (num) => { return Math.max(0, num - 10) }
-                const plusAction = (num, action) => { return Math.min(99, num + previousTick.actions[action] * 20) }
+                const plusAction = (num, action) => { return Math.min(99.99, num + previousTick.actions[action] * 20) }
 
                 newTick.resources = _.reduce(previousTick.conversions, applyConversion,
                   _.assign({}, previousTick.resources, {
@@ -232,10 +232,10 @@
                   })
                 )
                 inputsForTick = {
-                  nit: Math.min(99, newTick.resources.inputs.nit + tick.actions.dung * 20),
-                  pot: Math.min(99, newTick.resources.inputs.pot + tick.actions.saltpeter * 20),
-                  h2o: Math.min(99, newTick.resources.inputs.h2o + tick.actions.water * 20),
-                  oxy: Math.min(99, newTick.resources.inputs.oxy + tick.actions.oxygen * 20),
+                  nit: Math.min(99.99, newTick.resources.inputs.nit + tick.actions.dung * 20),
+                  pot: Math.min(99.99, newTick.resources.inputs.pot + tick.actions.saltpeter * 20),
+                  h2o: Math.min(99.99, newTick.resources.inputs.h2o + tick.actions.water * 20),
+                  oxy: Math.min(99.99, newTick.resources.inputs.oxy + tick.actions.oxygen * 20),
                   sun: tick.actions.sunlight || newTick.resources.inputs.sun
                 }
               }
