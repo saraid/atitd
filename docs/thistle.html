@@ -400,7 +400,7 @@
           const round = (num) => {
             return parseInt((num.toString().split('.')[1] || '0')[0]) > 5 ? Math.ceil(num) : Math.floor(num)
           }
-          return <td title={this.props.value}>{round(this.props.value)}</td>;
+          return <td title={this.props.value}>{Math.floor(this.props.value)}</td>;
         }
       }
 
