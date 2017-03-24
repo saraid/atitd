@@ -107,8 +107,8 @@
       })
 
       function setEgyptWeek(week) {
-        if (VOID_LIST[action.week].length > 0) {
-          _.each(VOID_LIST[action.week], (void_key) => {
+        if (VOID_LIST[week].length > 0) {
+          _.each(VOID_LIST[week], (void_key) => {
             store.dispatch({ type: 'TOGGLE_VOID', conversion_key: void_key })
           })
           store.dispatch({ type: RUN_RECIPE })
