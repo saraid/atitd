@@ -802,7 +802,7 @@
       class Week extends React.Component {
         render() {
           const weeks = _.keys(this.props.void_list).map((week) => {
-            return <option>{week}</option>
+            return <option key={week}>{week}</option>
           });
           return <div>
             <select onChange={this.props.setWeek}>
@@ -814,11 +814,11 @@
 
       const WeekSelector = ReactRedux.connect(
         (state) => { return state },
-        (dispatch) => {
+        (dispatch) => { return {
           setWeek: (e) => {
             setEgyptWeek(e.target.value)
           }
-        }
+        } }
       )(Week)
 
       class ThistleApp extends React.Component {
