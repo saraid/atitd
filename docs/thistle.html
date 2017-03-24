@@ -43,7 +43,7 @@
         background-color: limegreen;
       }
 
-      #links {
+      .weekSelector, #links {
         text-align: right;
       }
 
@@ -804,7 +804,8 @@
           const weeks = _.keys(this.props.void_list).map((week) => {
             return <option key={week}>{week}</option>
           });
-          return <div>
+          return <div className="weekSelector">
+            Week No.:
             <select onChange={this.props.setWeek}>
               {weeks}
             </select>
@@ -829,7 +830,8 @@
               <ConversionTableApp />
               <div id="links">
                 <a href="http://www.atitd.org/wiki/tale7/Thistle_Guide">Thistle Guide</a><br />
-                <a href="http://www.atitd.org/wiki/tale6/Guilds/Twisted_Thistle/Voidlist">Voidlist</a>
+                <a href="http://www.atitd.org/wiki/tale6/Guilds/Twisted_Thistle/Voidlist">Voidlist</a><br />
+                <a href="http://atitd.sharpnetwork.net/calendar.asp">Calendar</a>
               </div>
               <RecipeDisplay />
               <DaylightToggle />
