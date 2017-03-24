@@ -108,6 +108,7 @@
 
       function setEgyptWeek(week) {
         if (VOID_LIST[week].length > 0) {
+          store.dispatch({ type: 'RESET_VOIDS' })
           _.each(VOID_LIST[week], (void_key) => {
             store.dispatch({ type: 'TOGGLE_VOID', conversion_key: void_key })
           })
