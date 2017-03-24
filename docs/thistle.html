@@ -92,6 +92,19 @@
       const TOGGLE_VOID = 'TOGGLE_VOID';
       const RUN_RECIPE = 'RUN_RECIPE';
 
+      let VOID_LIST = {};
+      fetch('./voidlist.data').then((response) => {
+        response.text().then((text) => {
+          _.each(text.split("\n"), (line) => {
+            let parts = line.split(': ')
+            let key = parts[0]
+            let voids = parts[1].split(',')
+
+            VOID_LIST[key] = voids
+          })
+        })
+      })
+
       const initialState = {
         daylight: 'daytime',
         ticks: Array(41).fill({
