@@ -869,6 +869,8 @@
               store.dispatch({ type: 'SET_RECIPE', recipe: value })
               store.dispatch({ type: 'READ_URL_PARAMS', key, value })
               break;
+            case 'week':
+              setEgyptWeek(value);
             case 'voids':
               _.each(value.split(','), (cvoid) => {
                 store.dispatch({ type: 'TOGGLE_VOID', conversion_key: cvoid.replace(/[\s\d\.]+/g, '') })
