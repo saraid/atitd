@@ -810,7 +810,8 @@
       class Week extends React.Component {
         render() {
           const weeks = _.keys(this.props.void_list).map((week) => {
-            return <option {_.get(this.props, 'ux.week') == week && 'selected'} key={week}>{week}</option>
+            let selected = _.get(this.props, 'ux.week') == week
+            return <option {selected && 'selected'} key={week}>{week}</option>
           });
           return <div className="weekSelector">
             Week No.:
