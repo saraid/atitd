@@ -314,7 +314,7 @@
             }, [])
             return _.assign({}, state, { ticks })
           case 'SET_VOID_LIST':
-            return _.assign({}, state, { void_list: action.void_list });
+            return _.assign({}, state, { void_list: action.list });
           case 'SET_RECIPE':
             const parts = action.recipe.split(' ')
             var newTicks = _.map(state.ticks, _.identity)
