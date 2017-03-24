@@ -799,7 +799,7 @@
       class Week extends React.Component {
         render() {
           const weeks = _.keys(VOID_LIST).map((week) => {
-            <option>{week}</option>
+            return <option>{week}</option>
           });
           return <div>
             <select onChange={this.props.setWeek}>
