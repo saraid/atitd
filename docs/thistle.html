@@ -188,6 +188,12 @@
                 })
               })
             })
+          case 'RESET_VOIDS':
+            return _.assign({}, state, {
+              conversions: _.map(state.conversions, function(c) {
+                return _.assign({}, c, { void: false });
+              })
+            });
           case 'TOGGLE_VOID':
             return _.assign({}, state, {
               conversions: _.map(state.conversions, function(c) {
