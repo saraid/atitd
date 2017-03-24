@@ -1,0 +1,443 @@
+1: 
+2: 
+3: 
+4: 
+5: 
+6: 
+7: 
+8: 
+9: 
+10: 
+11: 
+12: 
+13: 
+14: 
+15: 
+16: 
+17: 
+18: 
+19: 
+20: 
+21: 
+22: 
+23: 
+24: 
+25: 
+26: 
+27: 
+28: Fol->Asc,Pot->Bio,Thi->Nia,Fol->Pyr,Nia->Thi
+29: Car->Asc?
+30: Thi->Car
+31: 
+32: 
+33: 
+34: 
+35: Asc->Bio,Pot->Fol,Thi->Fol,Asc->Nia
+36: 
+37: Fol->Asc,Thi->Car,Asc->Nia,Nit->Pyr
+38: Nit->Asc,Asc->Thi,Car->Thi,Nia->Thi
+39: Thi->Car,Pyr->Nia,Fol->Pyr
+40: Fol->Asc,Asc->Bio,Pot->Fol,Thi->Fol
+41: 
+42: 
+43: 
+44: 
+45: 
+46: 
+47: 
+48: 
+49: 
+50: 
+51: 
+52: Thi->Fol,Car->Pyr
+53: 
+54: 
+55: 
+56: 
+57: Pot->Car?,Thi->Car?,Nia->Fol?,Pyr->Nia?,Nit->Pyr?
+58: 
+59: 
+60: Pyr->Nia?
+61: 
+62: 
+63: 
+64: 
+65: 
+66: 
+67: 
+68: 
+69: 
+70: 
+71: 
+72: 
+73: 
+74: 
+75: 
+76: 
+77: 
+78: 
+79: 
+80: 
+81: 
+82: 
+83: 
+84: 
+85: 
+86: Nia->Fol,Nit->Pyr,Maybemore
+87: 
+88: 
+89: Fol->Asc
+90: 
+91: Asc->Car,Car->Pyr
+92: Fol->Asc,Asc->Bio,Asc->Car,Pyr->Nia,Asc->Thi
+93: Car->Asc,Pyr->Nia,Fol->Pyr,Car->Thi
+94: 
+95: 
+96: Fol->Asc,Asc->Car
+97: Nit->Asc
+98: Asc->Bio,Pyr->Bio,Thi->Car,Fol->Pyr
+99: Pot->Car
+100: Thi->Nia,Nit->Pyr
+101: Car->Asc,Asc->Car,Nia->Thi
+102: Fol->Asc,Asc->Bio,Pot->Fol,Asc->Nia,Thi->Nia
+103: Car->Asc,Pot->Fol
+104: Nit->Asc,Asc->Bio,Thi->Nia
+105: Fol->Asc,Asc->Car
+106: Pot->Car,Nia->Fol,Pyr->Nia,Fol->Pyr,Nia->Thi
+107: Pot->Fol,Thi->Nia
+108: Fol->Asc,Asc->Bio,Pyr->Bio,Thi->Car,Pot->Fol,Asc->Nia,Pyr->Nia,Nit->Pyr,Car->Pyr
+109: Pot->Bio,Pyr->Bio,Thi->Fol,Nia->Thi
+110: Car->Asc,Asc->Car,Nia->Fol,Thi->Fol,Thi->Nia,Car->Thi,Nia->Thi
+111: 
+112: Pyr->Bio,Asc->Nia,Pyr->Nia
+113: Fol->Asc,Pot->Bio,Thi->Fol,Pyr->Nia,Nit->Pyr
+114: Nit->Pyr
+115: Pot->Bio,Car->Pyr
+116: Nit->Asc,Car->Asc,Nia->Fol
+117: Pot->Car,Thi->Car,Fol->Pyr,Asc->Thi
+118: Nit->Asc,Pyr->Bio,Fol->Pyr,Car->Thi
+119: Pot->Bio,Asc->Nia,Pyr->Nia,Thi->Nia,Asc->Thi
+120: Nit->Asc,Fol->Pyr
+121: Nia->Fol
+122: Nit->Asc,Car->Asc,Pot->Car,Pyr->Nia
+123: Car->Asc,Asc->Bio,Thi->Car,Nia->Fol,Nit->Pyr
+124: Car->Asc,Pyr->Nia
+125: Novoids
+126: Thi->Fol
+127: Car->Asc,Asc->Bio,Pot->Car,Asc->Car,Asc->Thi
+128: Pot->Bio,Asc->Car,Nia->Fol,Nia->Thi
+129: Car->Asc,Asc->Car,Nia->Fol,Nit->Pyr,Car->Pyr,Fol->Pyr
+130: Nit->Asc,Car->Asc,Asc->Car,Thi->Nia,Nit->Pyr,Nia->Thi
+131: Novoids
+132: Pyr->Nia
+133: Pot->Car,Asc->Car,Thi->Fol,Fol->Pyr,Asc->Thi,Car->Thi
+134: Nia->Fol,Pyr->Nia,Asc->Thi,Car->Thi
+135: Pot->Bio,Asc->Bio,Pyr->Nia,Asc->Thi
+136: Asc->Nia
+137: Nia->Fol,Thi->Nia,Car->Pyr
+138: Pyr->Bio,Pot->Car,Thi->Nia,Car->Pyr,Nia->Thi
+139: Pot->Bio,Pyr->Bio,Thi->Nia
+140: Pot->Fol,Nia->Fol,Thi->Fol,Thi->Nia
+141: Asc->Bio,Thi->Car,Pot->Fol,Asc->Nia
+142: Novoids
+143: Pot->Car,Thi->Car,Pot->Fol,Nia->Fol,Car->Pyr
+144: Pyr->Bio,Asc->Car,Car->Pyr
+145: Asc->Car,Car->Thi
+146: Pot->Bio,Pot->Fol,Car->Thi
+147: Thi->Car,Pot->Fol,Car->Pyr
+148: Car->Asc,Car->Pyr,Nia->Thi
+149: Pot->Fol
+150: Car->Asc,Pot->Fol,Asc->Nia,Fol->Pyr
+151: Car->Asc,Pyr->Bio,Thi->Car,Nia->Fol,Nit->Pyr,Fol->Pyr
+152: Pyr->Bio,Thi->Fol,Asc->Nia,Pyr->Nia,Fol->Pyr,Nia->Thi
+153: Asc->Nia,Pyr->Nia,Thi->Nia,Asc->Thi
+154: Car->Asc,Asc->Car,Thi->Car,Nit->Pyr
+155: Nit->Asc,Pot->Fol,Thi->Fol
+156: Thi->Nia,Nit->Pyr
+157: Thi->Car,Fol->Pyr,Asc->Thi,Car->Thi
+158: Thi->Nia,Nit->Pyr
+159: Novoids
+160: Nit->Asc,Car->Asc,Pot->Bio,Pot->Car,Thi->Fol
+161: Thi->Fol,Car->Pyr
+162: Thi->Car,Pyr->Nia
+163: Nia->Fol
+164: Car->Asc,Fol->Asc
+165: Fol->Asc,Pyr->Nia,Car->Pyr
+166: Pyr->Nia,Car->Thi
+167: Pot->Bio,Thi->Car,Asc->Nia,Fol->Pyr,Nia->Thi
+168: Pot->Car
+169: Pyr->Nia,Asc->Thi,Car->Thi
+170: Car->Asc,Pot->Fol
+171: Fol->Asc,Pyr->Bio,Asc->Nia,Nit->Pyr
+172: Pot->Car,Nia->Thi
+173: Novoids
+174: Car->Asc,Pot->Bio
+175: Thi->Car,Pyr->Nia,Thi->Nia,Car->Pyr,Nia->Thi
+176: Pyr->Bio
+177: Pyr->Nia,Nia->Thi
+178: Novoids
+179: Novoids
+180: Pyr->Bio,Thi->Fol,Asc->Thi
+181: Car->Asc,Pyr->Bio
+182: Pyr->Bio,Car->Pyr,Asc->Thi,Nia->Thi
+183: Car->Asc,Asc->Nia,Asc->Thi
+184: Asc->Car
+185: Car->Asc,Pot->Fol,Asc->Thi,Car->Thi,OnlyDaytimeTested!
+186: Nit->Asc,Nia->Fol,Nit->Pyr,Car->Pyr,Car->Thi
+187: Pot->Bio,Pyr->Nia,Thi->Nia
+188: Car->Asc,Fol->Asc,Pyr->Bio,Car->Thi
+189: Car->Pyr
+190: Pot->Bio
+191: Fol->Asc,Pot->Bio
+192: Thi->Fol,Car->Thi
+193: Nit->Asc,Thi->Car,Pot->Fol,Asc->Thi,Nia->Thi
+194: Pot->Bio,Asc->Bio,Pyr->Bio,Fol->Pyr
+195: Pyr->Bio,Thi->Nia,Car->Pyr
+196: Pot->Bio,Nia->Fol,Asc->Nia
+197: Pot->Bio,Asc->Thi
+198: Fol->Pyr
+199: Nia->Fol,Asc->Nia,Thi->Nia
+200: Pyr->Bio,Pot->Fol,Pyr->Nia
+201: Pot->Fol
+202: Car->Asc,Fol->Asc,Asc->Bio,Asc->Nia,Pyr->Nia,Asc->Thi
+203: Pot->Bio,Pot->Car,Asc->Nia,Thi->Nia,Car->Pyr
+204: Fol->Asc,Thi->Nia
+205: Car->Asc,Asc->Car,Thi->Fol,Nia->Thi
+206: Pot->Bio,Fol->Pyr
+207: Nit->Asc,Pot->Bio,Asc->Car,Thi->Car,Nia->Thi
+208: Car->Asc,Thi->Nia
+209: Pyr->Nia,Thi->Nia,Car->Pyr,Asc->Thi
+210: Nia->Fol,Nit->Pyr
+211: Pyr->Bio,Asc->Nia,Car->Pyr,Asc->Thi,Nia->Thi
+212: Pot->Bio,Thi->Car,Thi->Nia,Car->Thi
+213: Nit->Asc,Pot->Bio,Maybemore?
+214: Pot->Car,Fol->Asc,Thi->Fol,Pyr->Nia,Nit->Pyr
+215: Pot->Fol,Thi->Fol,Pyr->Nia,Car->Thi
+216: Pot->Bio,Asc->Bio,Pot->Car
+217: Asc->Bio,Nia->Fol
+218: Car->Asc,Thi->Car,Thi->Nia,Nit->Pyr,Fol->Pyr
+219: Asc->Car
+220: Thi->Nia,Fol->Pyr,Nia->Thi
+221: Pot->Fol,Car->Thi
+222: Pyr->Bio,Asc->Nia
+223: Nit->Asc,Asc->Car
+224: Pot->Car,Pyr->Nia,Nia->Thi
+225: Pot->Car,Thi->Fol,Thi->Nia,Car->Pyr
+226: Nia->Fol,Thi->Nia,Nit->Pyr,Car->Thi
+227: Asc->Bio,Nit->Pyr,Asc->Thi
+228: Fol->Asc,Pyr->Bio,Pot->Fol,Car->Pyr,Fol->Pyr
+229: Fol->Asc,Nit->Pyr
+230: Nia->Fol,Thi->Fol,Asc->Nia,Car->Thi
+231: Pot->Car,Nit->Pyr,Car->Pyr,Car->Thi
+232: Asc->Bio,Car->Thi
+233: Fol->Asc,Nia->Fol,Asc->Nia,Fol->Pyr,Asc->Thi,Car->Thi,Nia->Thi
+234: Car->Asc,Asc->Car,Asc->Nia,Nia->Thi
+235: Pot->Car,Nia->Fol
+236: Pyr->Nia
+237: Car->Asc,Thi->Car,Fol->Pyr,Asc->Thi
+238: Pot->Bio,Asc->Nia,Fol->Pyr
+239: Novoids
+240: Pyr->Bio,Pyr->Nia,Fol->Pyr,Car->Thi,Nia->Thi
+241: Pot->Bio,Thi->Fol
+242: Nit->Asc,Thi->Nia
+243: Thi->Car,Pot->Fol,Asc->Nia
+244: Car->Pyr,Fol->Pyr,Nia->Thi
+245: Thi->Car
+246: Asc->Nia,Pyr->Nia,Thi->Nia,Car->Thi
+247: Pyr->Bio,Pot->Fol,Thi->Nia
+248: 
+249: Nit->Asc,Fol->Pyr
+250: Car->Asc,Fol->Pyr,Nia->Thi
+251: Pot->Bio,Thi->Nia,Asc->Thi,Nia->Thi
+252: Asc->Bio,Car->Pyr,Fol->Pyr,Nia->Thi
+253: Nit->Asc,Pot->Car,Car->Thi,Nia->Thi
+254: Thi->Fol
+255: Pot->Bio,Pyr->Bio,Pot->Car,Thi->Car,Nia->Thi
+256: Pot->Bio,Pyr->Bio,Pot->Car,Asc->Car,Asc->Nia
+257: Pyr->Nia,Car->Pyr,Car->Thi
+258: Asc->Thi,Car->Thi
+259: Pot->Bio,Fol->Pyr
+260: Nit->Asc,Asc->Bio,Thi->Car,Pot->Fol,Fol->Pyr
+261: Car->Asc,Nia->Fol,Nia->Thi
+262: Pot->Bio,Fol->Pyr,Pyr->Nia
+263: Car->Asc,Pot->Bio,Asc->Bio,Pyr->Bio,Thi->Nia
+264: Nit->Pyr,Car->Pyr,Car->Thi
+265: Car->Asc,Pot->Bio,Thi->Fol
+266: Nit->Asc
+267: Nit->Asc,Pyr->Bio,Thi->Car
+268: Car->Asc,Pyr->Bio,Asc->Nia,Car->Pyr,Fol->Pyr,Nia->Thi
+269: Nit->Asc,Pyr->Bio,Nia->Fol
+270: Nia->Fol,Pyr->Nia,Thi->Nia
+271: Novoids
+272: Novoids
+273: Car->Asc,Fol->Asc,Nia->Fol
+274: Pot->Fol,Thi->Fol,Car->Pyr,Car->Thi
+275: Fol->Asc,Thi->Nia,Nit->Pyr,Car->Thi
+276: Novoids
+277: Nit->Asc,Thi->Car,Asc->Thi
+278: Pot->Fol,Fol->Pyr
+279: Fol->Pyr,Car->Thi
+280: Nit->Asc,Asc->Bio,Asc->Nia,Car->Pyr
+281: Fol->Asc,Asc->Bio,Pot->Car,Fol->Pyr,Nia->Thi
+282: Pyr->Bio,Nia->Fol,Fol->Pyr,Asc->Thi,Nia->Thi
+283: Asc->Thi
+284: Pot->Car,Pyr->Nia
+285: Fol->Asc,Pot->Car,Thi->Car
+286: Pyr->Bio,Asc->Nia,Fol->Pyr
+287: Pot->Car
+288: Nit->Asc,Pot->Car,Asc->Car,Thi->Nia,Nit->Pyr,Car->Pyr,Nia->Thi
+289: Nit->Asc,Car->Asc,Asc->Thi,Car->Thi
+290: Nit->Asc,Pot->Fol
+291: Asc->Bio,Pyr->Bio,Thi->Fol,Asc->Thi
+292: Asc->Car,Nia->Fol,Thi->Fol,Nia->Thi
+293: Car->Asc,Asc->Nia,Pyr->Nia
+294: Nit->Asc,Nit->Pyr
+295: Pot->Fol,Nit->Pyr,Fol->Pyr
+296: Pot->Bio,Asc->Nia,Asc->Thi
+297: Thi->Car,Pot->Fol,Pyr->Nia
+298: Car->Pyr,Thi->Nia
+299: Thi->Nia,Nit->Pyr
+300: Thi->Fol,Asc->Nia,Thi->Nia
+301: Nit->Asc,Nia->Fol,Car->Pyr,Asc->Thi
+302: Nia->Fol,Car->Thi,maybemore?
+303: Car->Asc,Asc->Car,Nia->Fol,Car->Thi
+304: Asc->Bio,Asc->Car,Thi->Car,Pot->Fol,Thi->Nia?
+305: Pyr->Bio,Thi->Fol
+306: 
+307: Fol->Asc,Pyr->Bio,Pot->Fol,Thi->Fol,Nit->Pyr,Nia->Thi
+308: Nit->Asc,Pot->Fol,Nia->Fol,Fol->Pyr
+309: Pyr->Bio
+310: Car->Pyr,Asc->Thi
+311: Thi->Fol,Asc->Nia,Pyr->Nia,Thi->Nia,Fol->Pyr
+312: Fol->Asc,Thi->Car,Thi->Fol
+313: Pot->Bio,Pyr->Nia,Nit->Pyr
+314: Fol->Asc,Asc->Bio,Asc->Car
+315: Car->Asc,Thi->Car,Thi->Nia,Fol->Pyr
+316: 
+317: Car->Asc,Asc->Nia,Asc->Thi,Nia->Thi
+318: Fol->Asc,Asc->Nia,Car->Pyr
+319: Fol->Asc,Pot->Bio,Pot->Car,Asc->Car,Fol->Pyr
+320: Car->Asc,Pot->Bio,Nia->Fol,Pyr->Nia
+321: Asc->Nia
+322: Pot->Car,Thi->Car
+323: Pot->Car?,Pot->Fol?,Pyr->Nia?,Car->Pyr?
+324: 
+325: Thi->Car
+326: Pot->Car,Asc->Nia
+327: 
+328: 
+329: Pot->Bio
+330: Pyr->Bio,Nia->Fol,Car->Pyr
+331: Asc->Bio,Pyr->Nia,Nit->Pyr,Car->Pyr,Asc->Thi,Car->Thi
+332: Pot->Fol,Pyr->Nia,Fol->Pyr
+333: Thi->Nia
+334: Nit->Asc,Asc->Car,Car->Thi
+335: Asc->Car,Thi->Nia,Fol->Pyr
+336: Pot->Bio,Pyr->Nia,Car->Pyr,Car->Thi
+337: Asc->Bio,Thi->Fol,Car->Thi,Nia->Thi
+358: Car->Asc,Pot->Fol,Car->Pyr
+359: Nit->Asc,Thi->Car,Thi->Fol,Thi->Nia
+360: Pyr->Bio,Thi->Car,Pot->Car,Car->Pyr,Nia->Thi
+361: Nit->Asc,Fol->Asc,Asc->Bio,Thi->Car,Nit->Pyr
+362: Nit->Asc,Fol->Asc,Nia->Fol,Pyr->Nia
+363: Pot->Car,Car->Pyr,Asc->Thi
+364: Asc->Bio,Fol->Pyr,Nia->Thi
+365: Novoids
+366: 
+367: 
+368: 
+369: 
+370: 
+371: 
+372: 
+373: 
+374: 
+375: Thi->Fol,Car->Pyr,Nia->Thi
+376: Nit->Asc,Car->Asc,Thi->Nia
+377: Pot->Car,Thi->Fol,Asc->Nia,Fol->Pyr
+378: Nit->Pyr,Car->Pyr,Car->Thi
+379: Nit->Asc,Fol->Asc,Car->Pyr
+380: Pot->Bio
+381: Car->Asc,Nia->Fol,Thi->Fol,Fol->Pyr,Asc->Thi,Nia->Thi
+382: Nit->Asc,Fol->Pyr
+383: Nit->Asc,Thi->Fol,Asc->Nia
+384: Pot->Car,Asc->Car,Pot->Fol,Asc->Nia,Nit->Pyr,Nia->Thi
+385: Nit->Asc,Car->Asc
+386: Fol->Asc
+387: Nit->Asc,Pyr->Bio,Pot->Fol
+388: Pot->Fol
+389: Nia->Thi
+390: Fol->Asc,Asc->Bio,Pyr->Bio,Asc->Car,Thi->Car,Nit->Pyr,Asc->Thi
+391: Pot->Car,Pot->Fol,Asc->Thi,Car->Thi
+392: Nit->Asc,Car->Asc,Thi->Car,Pyr->Nia,Thi->Nia,Car->Pyr
+393: 
+394: 
+395: Nit->Asc,Thi->Car,Nit->Pyr,Fol->Pyr,Dayvoidnottest
+396: 
+397: 
+398: Nia->Thi
+399: Car->Asc,Thi->Car,Thi->Fol,Fol->Pyr
+400: 
+401: Novoids
+402: Car->Asc,Thi->Nia,Asc->Thi
+403: Pot->Fol,Pyr->Nia
+404: Fol->Asc,Pot->Bio,Asc->Bio,Pyr->Nia,Thi->Nia,Nit->Pyr
+405: Asc->Bio,Thi->Fol
+406: Asc->Thi,Fol->Asc,Nightnottest
+407: Thi->Car,Pot->Fol
+408: 
+409: 
+410: 
+411: Pot->Fol
+412: 
+413: 
+414: 
+415: 
+416: 
+417: Pot->Car,Nia->Thi
+455: Nia->Fol
+456: 
+457: 
+458: 
+459: 
+460: 
+461: 
+462: 
+463: Pyr->Bio,Pot->Car,Pot->Fol,Asc->Nia
+464: Pot->Car,Asc->Nia,Pyr->Nia,Thi->Nia,Car->Thi
+465: Pot->Car,Asc->Car,Fol->Pyr
+466: Pyr->Nia,Nit->Pyr,Nia->Thi
+467: Pot->Car,Thi->Fol,Car->Thi
+468: Pot->Bio,Fol->Pyr
+469: Pot->Fol,Fol->Pyr,Nia->Thi
+470: Nia->Fol,Thi->Fol,Fol->Pyr
+471: Asc->Car,Thi->Car,Asc->Thi,Nia->Thi
+472: Car->Asc,Fol->Asc,Asc->Car,Pot->Fol,Pot->Bio
+473: Nit->Asc,Fol->Asc,Pyr->Nia,Thi->Nia
+474: Fol->Asc,Asc->Car,Pot->Fol,Nit->Pyr,Fol->Pyr
+475: Nit->Asc,Asc->Car,Pot->Car,Nit->Pyr,Car->Asc
+476: Pot->Bio,Pyr->Bio
+477: Nit->Asc,Pyr->Bio,Nia->Fol
+478: Fol->Asc,Pot->Bio,Car->Pyr
+479: Fol->Asc,Pyr->Bio,Asc->Nia,Nia->Thi
+480: Fol->Asc,Pot->Bio,Thi->Car,Thi->Fol,Asc->Nia
+481: Pot->Car,Car->Pyr
+482: Nit->Asc,Thi->Fol,Car->Pyr
+483: Nit->Asc,Car->Asc,Fol->Asc,Pot->Bio,Pyr->Bio,Pyr->Nia
+484: Pot->Bio,Thi->Fol
+485: Asc->Bio,Thi->Fol,Nit->Pyr,Fol->Pyr,Nia->Thi
+486: Car->Asc,Fol->Asc,Pyr->Bio,Pot->Car
+487: Nit->Asc,Thi->Car
+488: Pot->Bio,Pot->Car
+489: Asc->Bio,Asc->Car,Car->Pyr,Car->Thi
+490: Asc->Bio,Car->Pyr,Nia->Thi
+491: Pot->Bio,Nia->Fol,Car->Pyr
+492: Nit->Asc,Pot->Fol,Pyr->Nia,Thi->Nia,Nit->Pyr
+493: Fol->Asc,Asc->Thi
+494: Asc->Bio,Thi->Fol,Asc->Nia
+495: Nit->Asc,Pot->Car,Pyr->Nia,Fol->Pyr
+496: Nit->Asc
+497: 
+498: 
+499: 
+500: Nit->Asc,Nia->Fol,Car->Thi
