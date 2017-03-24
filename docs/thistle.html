@@ -106,7 +106,11 @@
           })
           store.dispatch({ type: 'SET_VOID_LIST', list: VOID_LIST })
           let curWeek = _.get(store.getState(), 'ux.week')
-          if (curWeek) { setEgyptWeek(curWeek) }
+          if (curWeek && VOID_LIST[curWeek]) {
+            document.getElementsByClassName('weekSelector')[0].
+              getElementsByTagName('select')[0].value = curWeek
+            setEgyptWeek(curWeek)
+          }
         })
       })
 
@@ -806,7 +810,7 @@
       class Week extends React.Component {
         render() {
           const weeks = _.keys(this.props.void_list).map((week) => {
-            return <option key={week}>{week}</option>
+            return <option {_.get(this.props, 'ux.week') == week && 'selected'} key={week}>{week}</option>
           });
           return <div className="weekSelector">
             Week No.:
