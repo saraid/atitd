@@ -295,7 +295,7 @@
             return _.assign({}, state, { ticks })
           case 'SET_EGYPT_WEEK':
             if (VOID_LIST[action.week].length > 0) {
-              _.each(VOID_LIST[action.week], (void_key) {
+              _.each(VOID_LIST[action.week], (void_key) => {
                 store.dispatch({ type: 'TOGGLE_VOID', conversion_key: void_key })
               })
               store.dispatch({ type: RUN_RECIPE })
