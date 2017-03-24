@@ -98,6 +98,7 @@
           _.each(text.split("\n"), (line) => {
             let parts = line.split(': ')
             if (parts.length != 2) { return; }
+            if (_.isEmpty(parts[1])) { return; }
             let key = parts[0]
             let voids = parts[1].split(',')
 
@@ -795,10 +796,32 @@
         (state) => { return state }
       )(Permalink)
 
+      class Week extends React.Component {
+        render() {
+          const weeks = _.keys(VOID_LIST).map((week) => {
+            <option>{week}</option>
+          });
+          return <div>
+            <select onChange={this.props.setWeek}>
+            </select>
+          </div>;
+        }
+      }
+
+      const WeekSelector = ReactRedux.connect(
+        null,
+        (dispatch) => {
+          setWeek: (e) => {
+            setEgyptWeek(e.target.value)
+          }
+        }
+      )(Week)
+
       class ThistleApp extends React.Component {
         render() {
           return <div id="app">
             <div id="sidebar">
+              <WeekSelector />
               <ConversionTableApp />
               <div id="links">
                 <a href="http://www.atitd.org/wiki/tale7/Thistle_Guide">Thistle Guide</a><br />
