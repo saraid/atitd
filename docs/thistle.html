@@ -97,6 +97,7 @@
         response.text().then((text) => {
           _.each(text.split("\n"), (line) => {
             let parts = line.split(': ')
+            if (parts.length != 2) { return; }
             let key = parts[0]
             let voids = parts[1].split(',')
 
