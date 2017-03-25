@@ -798,8 +798,8 @@
             recipe: _.get(document.getElementById('simRecipeDisplay'), 'value'),
             voids: _.map(_.filter(this.props.conversions, (c) => { return c.void }), 'key').join(',')
           }, (v, k) => { if (!_.isEmpty(v)) { return `${k}=${v}` } })).join('&')
-          let hash = encodeURIComponent(btoa(query))
-          return <a href={url+'#'+hash}>Permalink</a>
+          //let hash = encodeURIComponent(btoa(query))
+          return <a href={url+'?'+query}>Permalink</a>
         }
       }
 
