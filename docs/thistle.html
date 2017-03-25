@@ -265,7 +265,7 @@
               } else {
                 const previousTick = _.assign({}, _.last(memo))
                 const minusTen = (num) => { return Math.max(0, num - 10) }
-                const plusAction = (num, action) => { return Math.min(99.99, num + previousTick.actions[action] * 20) }
+                const plusAction = (num, action) => { return Math.min(99, num + previousTick.actions[action] * 20) }
 
                 newTick.resources = _.reduce(previousTick.conversions, applyConversion,
                   _.assign({}, previousTick.resources, {
