@@ -115,7 +115,7 @@
       })
 
       function setEgyptWeek(week) {
-        if (VOID_LIST[week].length > 0) {
+        if (VOID_LIST[week] && VOID_LIST[week].length > 0) {
           store.dispatch({ type: 'RESET_VOIDS' })
           _.each(VOID_LIST[week], (void_key) => {
             store.dispatch({ type: 'TOGGLE_VOID', conversion_key: void_key })
@@ -807,6 +807,83 @@
         (state) => { return state }
       )(Permalink)
 
+      class EgyptTime extends React.Component {
+        constructor(props) {
+          super(props);
+          _.bindAll(this, [ 'changeEgyptTime' ]);
+        }
+
+        changeEgyptTime(e) {
+          const timeParts = Array.from(e.target.form.getElementsByTagName('select')).
+            map((elem) => { return elem.value; })
+
+          let days = 0;
+          days += (parseInt(timeParts[0])-1) * 360; // Year
+          switch(timeParts[1]) { // Season
+            case 'Akhet': break;
+            case 'Peret': days += 120; break;
+            case 'Shemu': days += 240; break;
+          }
+          switch(timeParts[2]) { // Month
+            case 'I': break;
+            case 'II': days += 30; break;
+            case 'III': days += 60; break;
+            case 'IV': days += 90; break;
+          }
+          days += (parseInt(timeParts[3])-1);
+          const week = Math.floor(days / 7);
+
+          this.props.setWeek(week);
+          if (VOID_LIST[week]) {
+            document.getElementsByClassName('weekSelector')[0].
+              getElementsByTagName('select')[0].value = week;
+          }
+        }
+
+        yearOptions() {
+          return _.range(1, 8).
+            map((item) => { return <option key={item}>{item}</option>; });
+        }
+
+        seasonOptions() {
+          return [ 'Akhet', 'Peret', 'Shemu' ].
+            map((item) => { return <option key={item}>{item}</option>; });
+        }
+
+        monthOptions() {
+          return [ 'I', 'II', 'III', 'IV' ].
+            map((item) => { return <option key={item}>{item}</option>; });
+        }
+
+        dayOptions() {
+          return _.range(1, 31).
+            map((item) => { return <option key={item}>{item}</option>; });
+        }
+
+        renderDropdown(options) {
+          return <select onChange={this.changeEgyptTime}>
+            {options}
+          </select>;
+        }
+
+        render() {
+          return <form className="egyptTime">
+            Year {this.renderDropdown(this.yearOptions())},
+            {this.renderDropdown(this.seasonOptions())}
+            {this.renderDropdown(this.monthOptions())}-{this.renderDropdown(this.dayOptions())}
+          </form>;
+        }
+      }
+
+      const EgyptTimeSelector = ReactRedux.connect(
+        (state) => { return state },
+        (dispatch) => { return {
+          setWeek: (week) => {
+            setEgyptWeek(week);
+          }
+        } }
+      )(EgyptTime)
+
       class Week extends React.Component {
         render() {
           const weeks = _.keys(this.props.void_list).map((week) => {
@@ -834,6 +911,8 @@
         render() {
           return <div id="app">
             <div id="sidebar">
+              Current: <img src="http://armeagle.atitd.org/pngtime.php" />
+              <EgyptTimeSelector />
               <WeekSelector />
               <ConversionTableApp />
               <div id="links">
