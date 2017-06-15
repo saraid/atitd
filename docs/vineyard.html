@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Vineyard Simulator</title>
+    <script src="https://unpkg.com/react@latest/dist/react.js"></script>
+    <script src="https://unpkg.com/react-dom@latest/dist/react-dom.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+    <script src="https://unpkg.com/lodash@latest/lodash.min.js"></script>
+    <script src="https://unpkg.com/redux@3.6.0/dist/redux.min.js"></script>
+    <script src="https://unpkg.com/react-redux@5.0.3/dist/react-redux.min.js"></script>
+    <script src="https://unpkg.com/whatwg-fetch@2.0.3/fetch.js"></script>
+    <style type="text/css">
+      #sidebar {
+        position: fixed;
+        right: 0;
+        margin-right: 2em;
+        width: 384px;
+      }
+
+      #vineyardInput .invalid {
+        border-color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/babel">
+      const initialState = {
+        grape: '',
+        vineyardStates: [],
+        cultivation: [{
+          vineyardState: 'Stems look especially fat',
+          tendAction: null,
+          acid: 0,
+          color: 0,
+          grapes: 10,
+          quality: 0,
+          skin: 0,
+          sugar: 0,
+          vigor: 100,
+          step: 0
+        }]
+      };
+
+      const mapVerboseToAbbrev = {
+        tend: {
+          'Aerate the soil': 'as',
+          'Mist the grapes': 'mg',
+          'Pinch off the weakest stems': 'po',
+          'Shade the leaves': 'sl',
+          'Spread out the vines': 'sv',
+          'Tie the vines to the trellis': 'tv',
+          'Trim the lower leaves': 'tl'
+        },
+        vineyard: {
+          'The vines are sagging a bit': 'sagging',
+          'Leaves are wilting': 'wilting',
+          'A musty smell can be detected': 'musty',
+          'Stems look especially fat': 'fat',
+          'Leaves rustle in the breeze': 'rustle',
+          'The grapes are starting to shrivel': 'shrivel',
+          'Leaves shimmer with moisture': 'shimmer'
+        }
+      }
+
+      const tendTable = {"fat":{"as":{"a":2,"c":6,"g":7,"q":1,"k":-9,"s":-2,"v":-2},"mg":{"a":1,"c":4,"g":3,"q":3,"k":11,"s":-2,"v":-4},"po":{"a":2,"c":3,"g":4,"q":1,"k":15,"s":-3,"v":-6},"sl":{"a":-5,"c":8,"g":3,"q":-2,"k":16,"s":0,"v":-12},"sv":{"a":1,"c":-4,"g":-6,"q":-2,"k":12,"s":4,"v":-14},"tv":{"a":4,"c":2,"g":0,"q":1,"k":-6,"s":0,"v":-3},"tl":{"a":5,"c":-1,"g":-2,"q":3,"k":9,"s":-2,"v":-12}},"musty":{"as":{"a":1,"c":2,"g":2,"q":-3,"k":15,"s":1,"v":-5},"mg":{"a":6,"c":2,"g":3,"q":3,"k":7,"s":3,"v":-14},"po":{"a":5,"c":6,"g":5,"q":1,"k":-1,"s":2,"v":-12},"sl":{"a":7,"c":8,"g":-5,"q":1,"k":15,"s":1,"v":-9},"sv":{"a":8,"c":4,"g":6,"q":0,"k":8,"s":4,"v":-6},"tv":{"a":0,"c":4,"g":-6,"q":-1,"k":-11,"s":2,"v":-8},"tl":{"a":8,"c":-2,"g":-3,"q":0,"k":-11,"s":-2,"v":-3}},"rustle":{"as":{"a":4,"c":4,"g":-5,"q":0,"k":6,"s":2,"v":-9},"mg":{"a":7,"c":-3,"g":6,"q":3,"k":5,"s":1,"v":-6},"po":{"a":5,"c":-6,"g":2,"q":3,"k":16,"s":-2,"v":-1},"sl":{"a":0,"c":8,"g":1,"q":1,"k":13,"s":2,"v":-11},"sv":{"a":6,"c":-4,"g":-5,"q":-3,"k":-11,"s":-1,"v":-4},"tv":{"a":-5,"c":0,"g":-6,"q":-2,"k":8,"s":-2,"v":-4},"tl":{"a":7,"c":1,"g":-5,"q":-3,"k":14,"s":0,"v":-5}},"sagging":{"as":{"a":4,"c":-2,"g":1,"q":0,"k":-8,"s":2,"v":-10},"mg":{"a":2,"c":-3,"g":2,"q":-3,"k":14,"s":0,"v":-5},"po":{"a":3,"c":-6,"g":-4,"q":1,"k":1,"s":3,"v":-9},"sl":{"a":-6,"c":2,"g":7,"q":4,"k":-6,"s":4,"v":-10},"sv":{"a":-6,"c":-1,"g":-4,"q":1,"k":5,"s":-3,"v":-10},"tv":{"a":-2,"c":6,"g":3,"q":2,"k":6,"s":3,"v":-10},"tl":{"a":-6,"c":4,"g":0,"q":1,"k":6,"s":-2,"v":-7}},"shimmer":{"as":{"a":-6,"c":0,"g":-2,"q":1,"k":4,"s":3,"v":-1},"mg":{"a":-4,"c":-3,"g":2,"q":-1,"k":5,"s":-1,"v":-9},"po":{"a":2,"c":8,"g":-1,"q":4,"k":-3,"s":-3,"v":-1},"sl":{"a":-5,"c":-1,"g":-2,"q":2,"k":-11,"s":-2,"v":-2},"sv":{"a":-3,"c":6,"g":8,"q":0,"k":11,"s":-3,"v":-10},"tv":{"a":0,"c":1,"g":4,"q":2,"k":-9,"s":0,"v":-14},"tl":{"a":3,"c":-4,"g":-4,"q":0,"k":4,"s":-2,"v":-10}},"shrivel":{"as":{"a":6,"c":-5,"g":2,"q":4,"k":9,"s":3,"v":-7},"mg":{"a":-2,"c":1,"g":-4,"q":-3,"k":-12,"s":-3,"v":-13},"po":{"a":-2,"c":4,"g":-3,"q":-1,"k":3,"s":4,"v":-6},"sl":{"a":8,"c":-3,"g":4,"q":3,"k":14,"s":1,"v":-6},"sv":{"a":5,"c":-2,"g":7,"q":4,"k":16,"s":2,"v":-9},"tv":{"a":-2,"c":4,"g":-6,"q":2,"k":1,"s":2,"v":-12},"tl":{"a":-4,"c":-1,"g":2,"q":4,"k":-1,"s":-1,"v":-2}},"wilting":{"as":{"a":-2,"c":5,"g":-2,"q":1,"k":4,"s":4,"v":-9},"mg":{"a":3,"c":5,"g":6,"q":2,"k":-2,"s":2,"v":-8},"po":{"a":2,"c":2,"g":-1,"q":4,"k":-7,"s":-3,"v":-11},"sl":{"a":-3,"c":3,"g":3,"q":-3,"k":-11,"s":0,"v":-12},"sv":{"a":8,"c":8,"g":0,"q":0,"k":10,"s":-1,"v":-14},"tv":{"a":5,"c":8,"g":2,"q":4,"k":8,"s":4,"v":-6},"tl":{"a":4,"c":5,"g":-1,"q":0,"k":13,"s":4,"v":-5}}};
+
+
+      function setCultivationStep(state, property, value, index) {
+        return _.assign({}, state, {
+          cultivation: _.tap(state.cultivation.map((step) => {
+            if (step.step === index) {
+              return _.assign({}, step, { [property]: value });
+            }
+            return step;
+          }), (cultivation) => {
+            const lastStep = _.last(cultivation);
+            if (!_.isEmpty(lastStep.tendAction)) {
+              const tend = tendTable[
+                mapVerboseToAbbrev.vineyard[lastStep.vineyardState]
+              ][
+                mapVerboseToAbbrev.tend[lastStep.tendAction]
+              ];
+              if (lastStep.vigor + tend.v > 0) {
+                cultivation.push({
+                  vineyardState: state.vineyardStates[lastStep.step + 1] ||
+                    _.keys(mapVerboseToAbbrev.vineyard)[0],
+                  tendAction: null,
+                  acid: Math.max(0, lastStep.acid + tend.a),
+                  color: Math.max(0, lastStep.color + tend.c),
+                  grapes: Math.max(0, lastStep.grapes + tend.g),
+                  quality: Math.max(0, lastStep.quality + tend.q),
+                  skin: Math.max(0, lastStep.skin + tend.k),
+                  sugar: Math.max(0, lastStep.sugar + tend.s),
+                  vigor: Math.max(0, lastStep.vigor + tend.v),
+                  step: lastStep.step + 1
+                });
+              }
+            }
+          })
+        });
+      };
+
+      function vineyardApp(state = initialState, action) {
+        console.log(action.type, action);
+        switch(action.type) {
+          case 'CHANGE_GRAPES':
+            return setCultivationStep(state, 'grapes', action.grapes, 0);
+          case 'CHANGE_VINEYARD_STATE':
+            return setCultivationStep(state, 'vineyardState', action.state, action.step);
+          case 'CHANGE_TEND_ACTION':
+            return setCultivationStep(state, 'tendAction', action.tend, action.step);
+          case 'CHANGE_VINEYARD_STATES':
+            return _.assign({}, state, { vineyardStates: action.states });
+          default: return state;
+        }
+      };
+      let store = Redux.createStore(vineyardApp);
+
+      class Cultivate extends React.Component {
+        constructor(props) {
+          super(props);
+
+          _.bindAll(this, [
+            'vineyardStates', 'onChangeVineyardState',
+            'tendActions', 'onChangeTendAction',
+            'showGrapes', 'onChangeStartingGrapes'
+          ]);
+        }
+
+        onChangeVineyardState(evt) {
+          this.props.changeVineyardState(evt.target.value, this.props.step);
+        }
+
+        vineyardStates() {
+          return [
+            'The vines are sagging a bit',
+            'Leaves are wilting',
+            'A musty smell can be detected',
+            'Stems look especially fat',
+            'Leaves rustle in the breeze',
+            'The grapes are starting to shrivel',
+            'Leaves shimmer with moisture'
+          ].map((state) => {
+            return <option key={state}>{state}</option>;
+          });
+        }
+
+        onChangeTendAction(evt) {
+          this.props.changeTendAction(evt.target.value, this.props.step);
+        }
+
+        tendActions() {
+          return [
+            '',
+            'Aerate the soil',
+            'Mist the grapes',
+            'Pinch off the weakest stems',
+            'Shade the leaves',
+            'Spread out the vines',
+            'Tie the vines to the trellis',
+            'Trim the lower leaves'
+          ].map((state) => { return <option key={state}>{state}</option>; });
+        }
+
+        onChangeStartingGrapes(evt) {
+          this.props.changeStartingGrapes(evt.target.valueAsNumber);
+        }
+
+        showGrapes() {
+          if (this.props.step === 0) {
+            return <input
+              type="number"
+              min="0" max="20" step="1"
+              defaultValue={this.props.grapes}
+              onChange={this.onChangeStartingGrapes} />;
+          } else {
+            return this.props.grapes;
+          }
+        }
+
+        render() {
+          return <tr className="cultivate">
+            <td><select className="vineyardState"
+                value={this.props.vineyardState}
+                onChange={this.onChangeVineyardState}>
+              {this.vineyardStates()}
+            </select></td>
+            <td><select className="tendAction"
+                onChange={this.onChangeTendAction}>
+              {this.tendActions()}
+            </select></td>
+            <td>{this.props.acid}</td>
+            <td>{this.props.color}</td>
+            <td>{this.showGrapes()}</td>
+            <td>{this.props.quality}</td>
+            <td>{this.props.skin}</td>
+            <td>{this.props.sugar}</td>
+            <td>{this.props.vigor}</td>
+          </tr>;
+        }
+      }
+      const CultivationStep = ReactRedux.connect(
+        null,
+        (dispatch) => { return {
+          changeStartingGrapes: (grapes) => {
+            store.dispatch({ type: 'CHANGE_GRAPES', grapes }); 
+          },
+          changeVineyardState: (state, step) => {
+            store.dispatch({ type: 'CHANGE_VINEYARD_STATE', state, step }); 
+          },
+          changeTendAction: (tend, step) => {
+            store.dispatch({ type: 'CHANGE_TEND_ACTION', tend, step }); 
+          }
+        }}
+      )(Cultivate);
+
+      class Cultivation extends React.Component {
+        render() {
+          const cultivation = _.map(this.props.cultivation, (step, index) => {
+            return <CultivationStep key={index} {...step} />;
+          });
+          return <table id="cultivation">
+            <thead><tr>
+              <th>Vineyard</th>
+              <th>Tend</th>
+              <th>Acid</th>
+              <th>Color</th>
+              <th>Grapes</th>
+              <th>Quality</th>
+              <th>Skin</th>
+              <th>Sugar</th>
+              <th>Vigor</th>
+            </tr></thead>
+            <tbody>
+              {cultivation}
+            </tbody>
+          </table>;
+        }
+      }
+      const CultivationRun = ReactRedux.connect(
+        (state) => state,
+        (dispatch) => { return {
+        }}
+      )(Cultivation);
+
+      class Vineyard extends React.Component {
+        constructor(props) {
+          super(props)
+
+          this.state = { valid: true };
+          _.bindAll(this, [
+            'onChangeVineyardStates'
+          ]);
+        }
+
+        onChangeVineyardStates(evt) {
+          const codes = {
+            G: 'The vines are sagging a bit',
+            W: 'Leaves are wilting',
+            M: 'A musty smell can be detected',
+            F: 'Stems look especially fat',
+            R: 'Leaves rustle in the breeze',
+            V: 'The grapes are starting to shrivel',
+            H: 'Leaves shimmer with moisture'
+          }
+          let valid = true;
+          const states = evt.target.value.split('').map((code) => {
+            if (codes[code]) {
+              return codes[code];
+            } else {
+              valid = false;
+            }
+          })
+          if (valid) {
+            this.setState({ valid: true });
+            this.props.changeVineyardStates(states);
+          } else {
+            this.setState({ valid: false });
+          }
+        }
+
+        render() {
+          const help = `
+            G: The vines are sagging a bit
+            W: Leaves are wilting
+            M: A musty smell can be detected
+            F: Stems look especially fat
+            R: Leaves rustle in the breeze
+            V: The grapes are starting to shrivel
+            H: Leaves shimmer with moisture
+          `;
+          return <div id="vineyardInput" title={help}>
+            Vineyard: <input
+              className={this.state.valid || "invalid"}
+              type="text" onChange={this.onChangeVineyardStates} />
+          </div>;
+        }
+      }
+      const VineyardInput = ReactRedux.connect(
+        (state) => state,
+        (dispatch) => { return {
+          changeVineyardStates: (states) => {
+            store.dispatch({ type: 'CHANGE_VINEYARD_STATE', state: states[0], step: 0 });
+            store.dispatch({ type: 'CHANGE_VINEYARD_STATES', states });
+          }
+        }}
+      )(Vineyard);
+
+      class Translator extends React.Component {
+        constructor(props) {
+          super(props);
+
+          _.bindAll(this, [ 'translate' ]);
+        }
+
+        translate(evt) {
+          let translation = _.compact(evt.target.value.split("\n").map((line) => {
+            if (/sag/i.test(line)) {
+              return 'G';
+            } else if (/wilt/i.test(line)) {
+              return 'W';
+            } else if (/musty/i.test(line)) {
+              return 'M';
+            } else if (/fat/i.test(line)) {
+              return 'F';
+            } else if (/rustl/i.test(line)) {
+              return 'R';
+            } else if (/shrivel/i.test(line)) {
+              return 'V';
+            } else if (/shimmer/i.test(line)) {
+              return 'H';
+            } else {
+              // TODO: Invalid
+            }
+          })).join('');
+
+          document.querySelector('#translation').value = translation;
+        }
+
+        render() {
+          return <div id="translator">
+            Translator:<br />
+            <textarea onChange={this.translate} rows="25" cols="30" /><br />
+            <input id="translation" type="text" />
+          </div>;
+        }
+      }
+      const TranslatorApp = ReactRedux.connect(
+        (state) => state,
+        (dispatch) => { return {
+        }}
+      )(Translator);
+
+      class VineyardApp extends React.Component {
+        render() {
+          return <div id="app">
+            <div id="sidebar">
+              <Translator />
+            </div>
+            Current Grape: <a href="http://www.atitd.org/wiki/tale7/Wine/Pascalito356">
+              Pascalito#356
+            </a>
+            <VineyardInput />
+            <CultivationRun />
+          </div>;
+        }
+      }
+      ReactRedux.connect()(VineyardApp);
+
+      ReactDOM.render(
+        <ReactRedux.Provider store={store}>
+          <VineyardApp />
+        </ReactRedux.Provider> ,
+        document.getElementById('root')
+      );
+    </script>
+  </body>
+</html>
