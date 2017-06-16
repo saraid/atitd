@@ -1,19 +1,13 @@
 module ATITD
   module Vineyard
     class Coding
-      MAPPING = {
-        G: /sag/i,
-        W: /wilt/i,
-        M: /musty/i,
-        F: /fat/i,
-        R: /rustl/i,
-        V: /shrivel/i,
-        H: /shimmer/i
-      }
-
       def initialize(string)
+        @string = string
         @errors = []
-        puts(string.split($/).map.with_index do |line, index|
+      end
+
+      def encode!
+        puts(@string.split($/).map.with_index do |line, index|
           case line
           when /sag/i then :G
           when /wilt/i then :W
@@ -28,11 +22,39 @@ module ATITD
           end
         end.compact.join(''))
         @errors.each do |error|
-          puts "#{index.succ}. #{line}"
+          puts "#{error[:index].succ}. #{error[:line]}"
+        end
+      end
+
+      def decode!
+        @string.chomp.split('').map.with_index do |code, index|
+          case code
+          when 'G' then 'The vines are sagging a bit'
+          when 'W' then 'Leaves are wilting'
+          when 'M' then 'A musty smell can be detected'
+          when 'F' then 'Stems look especially fat'
+          when 'R' then 'Leaves rustle in the breeze'
+          when 'V' then 'The grapes are starting to shrivel'
+          when 'H' then 'Leaves shimmer with moisture'
+          else
+            @errors << { code: code, index: index }
+            nil
+          end
+        end.compact.each(&Kernel.method(:puts))
+        @errors.each do |error|
+          puts "#{error[:index].succ}. #{error[:code].inspect}"
         end
       end
     end
   end
 end
 
-ATITD::Vineyard::Coding.new($stdin.read) if __FILE__ == $0
+if __FILE__ == $0
+  ATITD::Vineyard::Coding.new($stdin.read).send(
+    case ARGV.first
+    when '--encode' then :encode!
+    when '--decode' then :decode!
+    else :encode!
+    end
+  )
+end
