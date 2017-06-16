@@ -78,11 +78,32 @@ module ATITD
         end
       end
 
-      def initialize(vineyard:, tend_table:)
+      class Strategy
+        STRATEGIES = {
+          sugar: { proc: lambda { |_, change| change['s'] }, name: 'Max Sugar' },
+          color_skin: { proc: lambda { |_, change| change['k'] * change['c'] }, name: 'Max Color*Skin' },
+          vigor: { proc: lambda { |_, change| change['v'] }, name: 'Min Vigor' },
+        }
+
+        def initialize(code)
+          @code = code
+        end
+
+        def name
+          STRATEGIES.fetch(@code.to_sym)[:name]
+        end
+
+        def to_proc
+          STRATEGIES.fetch(@code.to_sym)[:proc]
+        end
+      end
+
+      def initialize(vineyard:, tend_table:, strategy:)
         @table = TendTable[JSON.parse(File.read(
           File.expand_path(File.join(__FILE__, "../../docs/#{tend_table}.json"))
         ))]
         @vineyard = Vineyard.decode(vineyard)
+        @strategy = Strategy.new(strategy)
       end
 
       def run
@@ -90,14 +111,17 @@ module ATITD
         require 'table_print'
         run = []
         puts "Vineyard: #{@vineyard}"
+        puts "Grape: #{@table['name']}"
+        puts "Strategy: #{@strategy.name}"
+        puts
+
         @vineyard.each_with_object(
           initial_state.merge(g: @table['starting'])
         ) do |state, memo|
           tick = {}
           tick[:vineyard] = state
           @table[state].
-            #max_by { |_, tend| tend['s'] }.
-            max_by { |_, tend| tend['c'] * tend['k'] }.
+            max_by(&@strategy).
             tap { |(action, _)| tick[:tend] = TendTable::CODES.invert[action] }.
             last.
             tap do |tend_action|
@@ -126,4 +150,4 @@ module ATITD
   end
 end
 
-ATITD::Vineyard::BruteForceSolver.new(tend_table: ARGV[0], vineyard: ARGV[1]).send(ARGV[2]) if __FILE__ == $0
+ATITD::Vineyard::BruteForceSolver.new(tend_table: ARGV[0], vineyard: ARGV[1], strategy: ARGV[2]).send(ARGV[3] || :run) if __FILE__ == $0
