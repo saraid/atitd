@@ -83,6 +83,7 @@ module ATITD
           sugar: { proc: lambda { |_, change| change['s'] }, name: 'Max Sugar' },
           color_skin: { proc: lambda { |_, change| change['k'] * change['c'] }, name: 'Max Color*Skin' },
           vigor: { proc: lambda { |_, change| change['v'] }, name: 'Min Vigor' },
+          grapes: { proc: lambda { |_, change| change['g'] }, name: 'Max Grapes' },
         }
 
         def initialize(code)
@@ -95,6 +96,22 @@ module ATITD
 
         def to_proc
           STRATEGIES.fetch(@code.to_sym)[:proc]
+        end
+      end
+
+      class TendStrategy
+        def initialize(tend_table:, strategy:)
+          @table = TendTable[JSON.parse(File.read(
+            File.expand_path(File.join(__FILE__, "../../docs/#{tend_table}.json"))
+          ))]
+          @strategy = Strategy.new(strategy)
+        end
+
+        def solution
+          @table.map do |state, options|
+            next unless options.is_a? Hash
+            [ state, TendTable::CODES.invert[options.max_by(&@strategy).first] ]
+          end.compact.to_h
         end
       end
 
@@ -115,7 +132,7 @@ module ATITD
         puts "Strategy: #{@strategy.name}"
         puts
 
-        @vineyard.each_with_object(
+        @result = @vineyard.each_with_object(
           initial_state.merge(g: @table['starting'])
         ) do |state, memo|
           tick = {}
@@ -135,6 +152,7 @@ module ATITD
         end
         tp run
       end
+      attr_reader :result
 
       def solutions
         @solutions ||= Solution.
