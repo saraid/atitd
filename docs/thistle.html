@@ -770,8 +770,8 @@
           return <div onClick={this.toggleDaylight}>
             Toggle Daylight: 
             <button>
-              { this.props.daylight == 'daytime' && '☀️' }
-              { this.props.daylight == 'nighttime' && '🌑' }
+              { this.props.daylight == 'daytime' && '☀️ (Daytime)' }
+              { this.props.daylight == 'nighttime' && '🌑 (Nighttime)' }
             </button>
           </div>;
         }
