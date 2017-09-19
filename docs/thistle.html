@@ -710,7 +710,7 @@
           return <div id="simRecipe">
             Recipe: <br />
             <input id="simRecipeDisplay" defaultValue={this.props.placeholder} type="text"
-              value={display} onChange={(e) => {this.props.updateRecipe(e.target.value.replace(/\[.*\] /, '')}} />
+              value={display} onChange={(e) => {this.props.updateRecipe(e.target.value.replace(/\[.*\] /, ''))}} />
           </div>;
         }
       }
