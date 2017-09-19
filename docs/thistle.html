@@ -325,7 +325,7 @@
           case 'SET_VOID_LIST':
             return _.assign({}, state, { void_list: action.list });
           case 'SET_RECIPE':
-            const parts = action.recipe.replace(/\[.*\] /, '').split(' ')
+            const parts = action.recipe.split(' ')
             var newTicks = _.map(state.ticks, _.identity)
             _.each(parts, (part) => {
               const partpart = part.split(':')
@@ -961,7 +961,7 @@
               store.dispatch({ type: 'READ_URL_PARAMS', key, value })
               break;
             case 'recipe':
-              store.dispatch({ type: 'SET_RECIPE', recipe: value })
+              store.dispatch({ type: 'SET_RECIPE', recipe: value.replace(/\[.*\] /, '') })
               store.dispatch({ type: 'READ_URL_PARAMS', key, value })
               break;
             case 'week':
