@@ -121,6 +121,7 @@
             store.dispatch({ type: 'TOGGLE_VOID', conversion_key: void_key })
           })
           store.dispatch({ type: RUN_RECIPE })
+          store.dispatch({ type: 'SET_EGYPT_WEEK', value: week })
         } else {
           console.log('not found; doing nothing');
         }
@@ -324,7 +325,7 @@
           case 'SET_VOID_LIST':
             return _.assign({}, state, { void_list: action.list });
           case 'SET_RECIPE':
-            const parts = action.recipe.split(' ')
+            const parts = action.recipe.replace(/\[\d+\] /, '').split(' ')
             var newTicks = _.map(state.ticks, _.identity)
             _.each(parts, (part) => {
               const partpart = part.split(':')
