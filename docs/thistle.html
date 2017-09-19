@@ -325,7 +325,7 @@
           case 'SET_VOID_LIST':
             return _.assign({}, state, { void_list: action.list });
           case 'SET_RECIPE':
-            const parts = action.recipe.replace(/\[\d+\] /, '').split(' ')
+            const parts = action.recipe.split(' ')
             var newTicks = _.map(state.ticks, _.identity)
             _.each(parts, (part) => {
               const partpart = part.split(':')
@@ -680,7 +680,7 @@
       class Recipe extends React.Component {
         render() {
           const week = _.get(this.props, 'ux.week');
-          let recipe = _.compact(_.map(this.props.ticks, (tick, index) => {
+          const recipe = _.compact(_.map(this.props.ticks, (tick, index) => {
             const instructions = _.map(tick.actions, (value, type) => {
               if (value > 0 || (type == 'sunlight' && !_.isNull(value)) ) {
                 let indicator
@@ -701,14 +701,16 @@
             }
           })).join(' ')
           
+          let display;
+          
           if (!_.isUndefined(week)) {
-            recipe = `[${week}] ${recipe}`;
+            display = `[${week}] ${recipe}`;
           }
 
           return <div id="simRecipe">
             Recipe: <br />
             <input id="simRecipeDisplay" defaultValue={this.props.placeholder} type="text"
-              value={recipe} onChange={(e) => {this.props.updateRecipe(e.target.value)}} />
+              value={display} onChange={(e) => {this.props.updateRecipe(e.target.value.replace(/\[.*\] /, '')}} />
           </div>;
         }
       }
