@@ -54,6 +54,11 @@
       #simRecipe input {
         width: 100%;
       }
+      #simNeeds .need {
+        display: inline-block;
+        font-size: 80%;
+        margin-left: 0.2em;
+      }
 
       tr.highlight {
         font-weight: bold;
@@ -915,6 +920,31 @@
         } }
       )(Week)
 
+      class Needs extends React.Component {
+        render() {
+          const sum = (num_array) => _.reduce(num_array, (sum, n) => sum + n, 0);
+
+          const needs = {
+            dung: sum(this.props.ticks.map((tick) => tick.actions.dung)),
+            saltpeter: sum(this.props.ticks.map((tick) => tick.actions.saltpeter)),
+            water: sum(this.props.ticks.map((tick) => tick.actions.water))
+          };
+          const dung = <span className="need">Dung: {needs.dung}</span>;
+          const saltpeter = <span className="need">Saltpeter: {needs.saltpeter}</span>;
+          const water = <span className="need">Water: {needs.water}</span>;
+
+          return <div id="simNeeds">
+            Total Needs (per seed):
+            {needs.dung > 0 && dung}
+            {needs.saltpeter > 0 && saltpeter}
+            {needs.water > 0 && water}
+          </div>
+        }
+      }
+
+      const NeedsDisplay = ReactRedux.connect((state) => state)(Needs);
+
+
       class ThistleApp extends React.Component {
         render() {
           return <div id="app">
@@ -930,6 +960,7 @@
               </div>
               <RecipeDisplay />
               <DaylightToggle />
+              <NeedsDisplay />
               <GoalInput />
               <PermalinkDisplay />
             </div>
