@@ -803,7 +803,7 @@
           let query = _.compact(_.map({
             daylight: _.get(this.props, 'daylight'),
             goal: _.get(this.props, 'goal.raw'),
-            recipe: _.get(document.getElementById('simRecipeDisplay'), 'value'),
+            recipe: _.get(document.getElementById('simRecipeDisplay'), 'value', '').replace(/\[.*\] /, ''),
             voids: _.map(_.filter(this.props.conversions, (c) => { return c.void }), 'key').join(',')
           }, (v, k) => { if (!_.isEmpty(v)) { return `${k}=${v}` } })).join('&')
           //let hash = encodeURIComponent(btoa(query))
@@ -961,7 +961,7 @@
               store.dispatch({ type: 'READ_URL_PARAMS', key, value })
               break;
             case 'recipe':
-              store.dispatch({ type: 'SET_RECIPE', recipe: value.replace(/\[.*\] /, '') })
+              store.dispatch({ type: 'SET_RECIPE', recipe: value)
               store.dispatch({ type: 'READ_URL_PARAMS', key, value })
               break;
             case 'week':
