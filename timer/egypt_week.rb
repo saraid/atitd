@@ -16,17 +16,19 @@ module ATITD
     end
 
     def initialize(num)
-      @num = num
-
-      days = num * DAYS_PER_WEEK
+      days = (num * DAYS_PER_WEEK) + 1
       year, remainder = days.divmod(EgyptTime::DAYS_PER_YEAR)
       season, remainder = remainder.divmod(EgyptTime::DAYS_PER_SEASON)
       month, days = remainder.divmod(EgyptTime::DAYS_PER_MONTH)
 
-      @begin = EgyptTime.new(year, EgyptTime::SEASONS[season], EgyptTime::MONTHS[month], days)
+      @begin = EgyptTime.new(year.succ, EgyptTime::SEASONS[season], EgyptTime::MONTHS[month], days)
       @end = @begin + DAYS_PER_WEEK.egypt.days
 
       super(@begin, @end)
+    end
+
+    def inspect
+      "#{@begin}..#{@end}"
     end
 
     def estimate_real_time_from(egypt_time)

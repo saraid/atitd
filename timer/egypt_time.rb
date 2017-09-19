@@ -64,10 +64,11 @@ module ATITD
       @drift = @drift.to_f if @drift
 
       @timestamp ||=
-        [@year.succ * SECONDS_PER_YEAR, SEASONS.index(@season) * SECONDS_PER_SEASON,
-         MONTHS.index(@month) * SECONDS_PER_MONTH, @day.succ * SECONDS_PER_DAY,
+        [@year * SECONDS_PER_YEAR, SEASONS.index(@season) * SECONDS_PER_SEASON,
+         MONTHS.index(@month) * SECONDS_PER_MONTH, @day * SECONDS_PER_DAY,
          @hour * SECONDS_PER_HOUR, @minute * SECONDS_PER_MINUTE, @second].
          reduce(0) { |sum, n| sum + n }
+      @timestamp = @timestamp.to_i
     end
     attr_reader :drift
     attr_accessor :real_time
