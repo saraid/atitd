@@ -22,6 +22,9 @@ module ATITD
     SECONDS_PER_SEASON = 10368000
     SECONDS_PER_YEAR = 31104000
 
+    DAYS_PER_SEASON = 120
+    DAYS_PER_YEAR = 360
+
     SEASONS = %w( Akhet Peret Shemu )
     MONTHS = %w( I II III IV )
     MERIDIANS = %w( AM PM )
@@ -30,6 +33,10 @@ module ATITD
       new(*open(TABTIME).read.chomp.split("\t")).tap do |time|
         time.real_time = Time.now
       end
+    end
+
+    def self.now
+      fetch
     end
 
     def self.from_timestamp(timestamp)
@@ -50,10 +57,17 @@ module ATITD
 
     def initialize(*parts)
       @year, @season, @month, @day, @hour, @minute, @meridian, @timestamp, @drift, @server = parts
-      %i[ @year @day @hour @minute @timestamp ].
+      %i[ @year @day @hour @minute ].
         each { |var| instance_variable_set(var, instance_variable_get(var).to_i) }
-      @second = @timestamp % SECONDS_PER_MINUTE
+      @second = (@timestamp || 0) % SECONDS_PER_MINUTE
+      @meridian ||= MERIDIANS.first
       @drift = @drift.to_f if @drift
+
+      @timestamp ||=
+        [@year.succ * SECONDS_PER_YEAR, SEASONS.index(@season) * SECONDS_PER_SEASON,
+         MONTHS.index(@month) * SECONDS_PER_MONTH, @day.succ * SECONDS_PER_DAY,
+         @hour * SECONDS_PER_HOUR, @minute * SECONDS_PER_MINUTE, @second].
+         reduce(0) { |sum, n| sum + n }
     end
     attr_reader :drift
     attr_accessor :real_time
@@ -63,11 +77,16 @@ module ATITD
     end
 
     def to_i
-      @timestamp
+      @timestamp.to_i
+    end
+
+    def <=>(other)
+      to_i <=> other.to_i
     end
 
     def to_s
-      "Year #{@year}, #{@season} #{@month}-#{@day}, #{@hour}:#{@minute} #{@meridian}"
+      hour = @hour.zero? ? '12' : @hour
+      "Year #{@year}, #{@season} #{@month}-#{@day}, #{hour}:#{'%02d' % @minute} #{@meridian}"
     end
 
     def +(other)
@@ -81,5 +100,28 @@ module ATITD
     def -(other)
       self + -other
     end
+
+    def week
+      @week ||=
+        begin
+          days = 0;
+          days += (@year-1) * 360;
+          days += case @season
+                    when 'Akhet' then 0;
+                    when 'Peret' then 120;
+                    when 'Shemu' then 240;
+                  end
+          days += case @month
+                    when 'I' then 0
+                    when 'II' then 30
+                    when 'III' then 60
+                    when 'IV' then 90
+                  end
+          days += @day-1;
+          (days / 7).floor
+        end
+    end
   end
 end
+
+require_relative 'egypt/duration'
