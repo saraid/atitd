@@ -678,7 +678,8 @@
 
       class Recipe extends React.Component {
         render() {
-          const recipe = _.compact(_.map(this.props.ticks, (tick, index) => {
+          const { week } = _.get(this.props, 'ux.week');
+          const recipe = `[${week}]` + _.compact(_.map(this.props.ticks, (tick, index) => {
             const instructions = _.map(tick.actions, (value, type) => {
               if (value > 0 || (type == 'sunlight' && !_.isNull(value)) ) {
                 let indicator
