@@ -321,7 +321,7 @@
             }, [])
             return _.assign({}, state, { ticks })
           case 'SET_EGYPT_WEEK':
-            return _.assign({}, state, { ux: { week: action.value } });
+            return _.assign({}, state, { ux: _.assign({}, state.ux, { week: action.value }) });
           case 'SET_VOID_LIST':
             return _.assign({}, state, { void_list: action.list });
           case 'SET_RECIPE':
