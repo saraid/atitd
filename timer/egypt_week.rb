@@ -32,10 +32,10 @@ module ATITD
     end
 
     def estimate_real_time_from(egypt_time)
-      @begin.real_time = egypt_time.real_time - (egypt_time.to_i - @begin.to_i).
-        abs.egypt.seconds.to_real_duration(egypt_time.drift)
-      @end.real_time = egypt_time.real_time + (egypt_time.to_i - @end.to_i).
-        abs.egypt.seconds.to_real_duration(egypt_time.drift)
+      @begin.real_time = egypt_time.real_time + (@begin.to_i - egypt_time.to_i).
+        egypt.seconds.to_real_duration(egypt_time.drift)
+      @end.real_time = egypt_time.real_time + (@end.to_i - egypt_time.to_i).
+        egypt.seconds.to_real_duration(egypt_time.drift)
     end
 
     def in_real_time
