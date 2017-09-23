@@ -15,6 +15,12 @@ module ATITD
       from_time(EgyptTime.now)
     end
 
+    def self.of(num, using = nil)
+      new(num).tap do |week|
+        week.estimate_real_time_from(using) unless using.nil?
+      end
+    end
+
     def initialize(num)
       days = (num * DAYS_PER_WEEK) + 1
       year, remainder = days.divmod(EgyptTime::DAYS_PER_YEAR)
