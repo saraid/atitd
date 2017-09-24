@@ -44,6 +44,10 @@ module ATITD
         egypt.seconds.to_real_duration(egypt_time.drift)
     end
 
+    def estimate_real_time!
+      estimate_real_time_from(EgyptTime.now)
+    end
+
     def in_real_time
       Range.new(@begin.real_time, @end.real_time)
     end
