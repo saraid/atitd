@@ -1,4 +1,5 @@
 require 'rack'
+require 'logger'
 
 def application(env)
   path = env['REQUEST_PATH']
@@ -22,10 +23,21 @@ def application(env)
 end
 
 Thread.new do
-  require 'active_support/core_ext/numeric/date'
+  Thread.abort_on_exception = true
+  logger = Logger.new(STDOUT)
+
+  CALENDAR_FILE = 'atitd_calendar.ics'
+  # Updates to game time occur every 15 game minutes.
+  # But I don't anticipate any meaningful changes within a 6-hour period.
+  TIMEOUT_PERIOD = 6.hours
+
+  load 'calendar.rb'
+  require 'active_support/core_ext/numeric/time'
   loop do
-    File.open('atitd_calendar.ics') { |f| f.write(ATITD::Calendar.new.to_ical) }
-    sleep 6.minutes
+    logger.info "Waking; constructing a new Calendar"
+    File.open(CALENDAR_FILENAME, 'w') { |f| f.write(ATITD::Calendar.new.to_ical) }
+    logger.info "Wrote to #{CALENDAR_FILENAME}; sleeping for #{TIMEOUT_PERIOD}"
+    sleep TIMEOUT_PERIOD
   end
 end
 
