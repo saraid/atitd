@@ -1,7 +1,9 @@
 require 'icalendar'
+require 'forwardable'
+
 require 'nokogiri'
 require 'open-uri'
-require 'forwardable'
+require_relative 'timer/egypt_week'
 
 module ATITD
   class Calendar
@@ -13,6 +15,11 @@ module ATITD
     def initialize
       @calendar = Icalendar::Calendar.new
 
+      add_events!
+      add_weeks!
+    end
+
+    def add_events!
       Nokogiri::HTML(open('http://www.atitd.com/events.html').read).
         css('h5 font').map do |html|
           @calendar.event do |e|
@@ -27,33 +34,21 @@ module ATITD
           end
         end
     end
+
+    def add_weeks!
+      now = EgyptTime.now
+      (now.week..now.week+5).map(&EgyptWeek.method(:of)).each do |week|
+        week.estimate_real_time_from(now)
+      end.each do |week|
+        real = week.in_real_time
+        @calendar.event do |e|
+          e.summary = "Week #{week.to_i}"
+          e.dtstart = real.begin
+          e.dtend = real.end
+        end
+      end
+    end
   end
 end
 
-require 'rack'
-
-def application(env)
-  path = env['REQUEST_PATH']
-  type =
-    case path
-      when /\.css$/ then 'text/css'
-      when /\.js$/ then 'text/javascript'
-      when /\.ico$/ then return [404, {'Content-Type' => "text/plain"}, '']
-      when /\.jpg$/ then 'image/jpeg'
-      when /\.ics$/ then 'text/calendar'
-      else 'text/html'
-    end
-
-  path =
-    case path
-      when '/' then '/index.html'
-      when '/atitd/calendar.ics'
-        load 'calendar.rb'
-        return [200, {'Content-Type' => type}, ATITD::Calendar.new.to_ical]
-      else path
-    end
-  data = File.open(Dir.pwd + path) { |f| f.read }
-  [200, {'Content-Type' => type}, data]
-end
-
-Rack::Handler::Thin.run method(:application), :Port => 1337
+puts ATITD::Calendar.new.to_ical if __FILE__ == $0

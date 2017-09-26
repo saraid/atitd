@@ -22,6 +22,8 @@ module ATITD
     end
 
     def initialize(num)
+      @num = num
+
       days = (num * DAYS_PER_WEEK) + 1
       year, remainder = days.divmod(EgyptTime::DAYS_PER_YEAR)
       season, remainder = remainder.divmod(EgyptTime::DAYS_PER_SEASON)
@@ -31,6 +33,10 @@ module ATITD
       @end = @begin + DAYS_PER_WEEK.egypt.days
 
       super(@begin, @end)
+    end
+
+    def to_i
+      @num
     end
 
     def inspect
