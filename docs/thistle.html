@@ -6,7 +6,7 @@
     <script src="https://unpkg.com/react@15.6.1/dist/react.js"></script>
     <script src="https://unpkg.com/react-dom@15.6.1/dist/react-dom.min.js"></script>
     <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
-    <script src="https://unpkg.com/lodash@latest/lodash.min.js"></script>
+    <script src="https://unpkg.com/lodash@4.17.4/lodash.min.js"></script>
     <script src="https://unpkg.com/redux@3.6.0/dist/redux.min.js"></script>
     <script src="https://unpkg.com/react-redux@5.0.3/dist/react-redux.min.js"></script>
     <script src="https://unpkg.com/whatwg-fetch@2.0.3/fetch.js"></script>
@@ -406,7 +406,7 @@
           var className = [ 'conversion' ];
           if (this.props.void) { className.push('void'); }
           if (this.props.highlight) { className.push('highlight'); }
-          return <div className={className.join(' ')} onClick={this.toggleVoid}>
+          return <div title="Click to toggle void" className={className.join(' ')} onClick={this.toggleVoid}>
             <div className="condition">{this.props.condition}</div>
             <div className="transform">{this.props.transform}</div>
           </div>;
@@ -587,7 +587,7 @@
           const tickActionsClasses = [ 'tickActions' ]
           if (!this.props.actionsWritable) { tickActionsClasses.push('noWrite') }
 
-          return <tr className={classes.join(' ')} title={JSON.stringify(this.props.tick)} onMouseEnter={this.hoverTick}>
+          return <tr className={classes.join(' ')} title={this.props.ux.debugging && JSON.stringify(this.props.tick)} onMouseEnter={this.hoverTick}>
             <td className="datum">{this.props.index}</td>
             <td className={tickActionsClasses.join(' ')}>
               {this.inputAction('n', 'dung')}
