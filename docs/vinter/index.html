@@ -65,6 +65,16 @@
       .vineyard {
         margin-top: 1.5em;
       }
+
+      .tend-table {
+        margin-top: 1.5em;
+      }
+
+      .tend-table .tend-table-header {
+        font-size: 110%;
+        font-weight: bold;
+        border-bottom: solid 1px black;
+      }
     </style>
   </head>
   <body>
@@ -72,10 +82,7 @@
     <script type="text/babel">
       const initialState = {
         grapes: [
-          {
-            name: 'blah blah blah',
-            states: []
-          }
+          {"fat":{"as":{"a":2,"c":6,"g":7,"q":1,"k":-9,"s":-2,"v":-2},"mg":{"a":1,"c":4,"g":3,"q":3,"k":11,"s":-2,"v":-4},"po":{"a":2,"c":3,"g":4,"q":1,"k":15,"s":-3,"v":-6},"sl":{"a":-5,"c":8,"g":3,"q":-2,"k":16,"s":0,"v":-12},"sv":{"a":1,"c":-4,"g":-6,"q":-2,"k":12,"s":4,"v":-14},"tv":{"a":4,"c":2,"g":0,"q":1,"k":-6,"s":0,"v":-3},"tl":{"a":5,"c":-1,"g":-2,"q":3,"k":9,"s":-2,"v":-12}},"musty":{"as":{"a":1,"c":2,"g":2,"q":-3,"k":15,"s":1,"v":-5},"mg":{"a":6,"c":2,"g":3,"q":3,"k":7,"s":3,"v":-14},"po":{"a":5,"c":6,"g":5,"q":1,"k":-1,"s":2,"v":-12},"sl":{"a":7,"c":8,"g":-5,"q":1,"k":15,"s":1,"v":-9},"sv":{"a":8,"c":4,"g":6,"q":0,"k":8,"s":4,"v":-6},"tv":{"a":0,"c":4,"g":-6,"q":-1,"k":-11,"s":2,"v":-8},"tl":{"a":8,"c":-2,"g":-3,"q":0,"k":-11,"s":-2,"v":-3}},"rustle":{"as":{"a":4,"c":4,"g":-5,"q":0,"k":6,"s":2,"v":-9},"mg":{"a":7,"c":-3,"g":6,"q":3,"k":5,"s":1,"v":-6},"po":{"a":5,"c":-6,"g":2,"q":3,"k":16,"s":-2,"v":-1},"sl":{"a":0,"c":8,"g":1,"q":1,"k":13,"s":2,"v":-11},"sv":{"a":6,"c":-4,"g":-5,"q":-3,"k":-11,"s":-1,"v":-4},"tv":{"a":-5,"c":0,"g":-6,"q":-2,"k":8,"s":-2,"v":-4},"tl":{"a":7,"c":1,"g":-5,"q":-3,"k":14,"s":0,"v":-5}},"sagging":{"as":{"a":4,"c":-2,"g":1,"q":0,"k":-8,"s":2,"v":-10},"mg":{"a":2,"c":-3,"g":2,"q":-3,"k":14,"s":0,"v":-5},"po":{"a":3,"c":-6,"g":-4,"q":1,"k":1,"s":3,"v":-9},"sl":{"a":-6,"c":2,"g":7,"q":4,"k":-6,"s":4,"v":-10},"sv":{"a":-6,"c":-1,"g":-4,"q":1,"k":5,"s":-3,"v":-10},"tv":{"a":-2,"c":6,"g":3,"q":2,"k":6,"s":3,"v":-10},"tl":{"a":-6,"c":4,"g":0,"q":1,"k":6,"s":-2,"v":-7}},"shimmer":{"as":{"a":-6,"c":0,"g":-2,"q":1,"k":4,"s":3,"v":-1},"mg":{"a":-4,"c":-3,"g":2,"q":-1,"k":5,"s":-1,"v":-9},"po":{"a":2,"c":8,"g":-1,"q":4,"k":-3,"s":-3,"v":-1},"sl":{"a":-5,"c":-1,"g":-2,"q":2,"k":-11,"s":-2,"v":-2},"sv":{"a":-3,"c":6,"g":8,"q":0,"k":11,"s":-3,"v":-10},"tv":{"a":0,"c":1,"g":4,"q":2,"k":-9,"s":0,"v":-14},"tl":{"a":3,"c":-4,"g":-4,"q":0,"k":4,"s":-2,"v":-10}},"shrivel":{"as":{"a":6,"c":-5,"g":2,"q":4,"k":9,"s":3,"v":-7},"mg":{"a":-2,"c":1,"g":-4,"q":-3,"k":-12,"s":-3,"v":-13},"po":{"a":-2,"c":4,"g":-3,"q":-1,"k":3,"s":4,"v":-6},"sl":{"a":8,"c":-3,"g":4,"q":3,"k":14,"s":1,"v":-6},"sv":{"a":5,"c":-2,"g":7,"q":4,"k":16,"s":2,"v":-9},"tv":{"a":-2,"c":4,"g":-6,"q":2,"k":1,"s":2,"v":-12},"tl":{"a":-4,"c":-1,"g":2,"q":4,"k":-1,"s":-1,"v":-2}},"wilting":{"as":{"a":-2,"c":5,"g":-2,"q":1,"k":4,"s":4,"v":-9},"mg":{"a":3,"c":5,"g":6,"q":2,"k":-2,"s":2,"v":-8},"po":{"a":2,"c":2,"g":-1,"q":4,"k":-7,"s":-3,"v":-11},"sl":{"a":-3,"c":3,"g":3,"q":-3,"k":-11,"s":0,"v":-12},"sv":{"a":8,"c":8,"g":0,"q":0,"k":10,"s":-1,"v":-14},"tv":{"a":5,"c":8,"g":2,"q":4,"k":8,"s":4,"v":-6},"tl":{"a":4,"c":5,"g":-1,"q":0,"k":13,"s":4,"v":-5}},"starting":11,"name":"Pascalito#356"}
         ],
         vineyards: [
           {
@@ -92,6 +99,16 @@
       function vineyardApp(state = initialState, action) {
         console.log(action.type, action);
         switch(action.type) {
+          case 'CHANGE_STARTING_NUMBER':
+            return _.assign({}, state, {
+              grapes: _.map(state.grapes, (grape) => {
+                if (grape.name == action.grape) {
+                  return _.assign({}, grape, { starting: action.starting });
+                } else {
+                  return _.assign({}, grape);
+                }
+              })
+            });
           case 'CHANGE_LISTING':
             return _.assign({}, state, { ux: _.assign({}, state.ux, { currentMain: action.listing }) });
           case 'CHANGE_TAB':
@@ -257,19 +274,54 @@
       class TendTable extends React.Component {
         header() {
           const map = {
-            'sag': 'The vines are sagging a bit',
-            'wilt': 'Leaves are wilting',
+            'sagging': 'The vines are sagging a bit',
+            'wilting': 'Leaves are wilting',
             'musty': 'A musty smell can be detected',
             'fat': 'Stems look especially fat',
             'rustle': 'Leaves rustle in the breeze',
             'shrivel': 'The grapes are starting to shrivel',
             'shimmer': 'Leaves shimmer with moisture'
           }[this.props.state];
-          return (<div>{capitalize(this.props.state)}: ({map})</div>);
+          return (<div className="tend-table-header">
+            {capitalize(this.props.state)}: ({map})
+          </div>);
+        }
+
+        tendAction(abbrev) {
+          return {
+            'as': 'Aerate the soil',
+            'mg': 'Mist the grapes',
+            'po': 'Pinch off the weakest stems',
+            'sl': 'Shade the leaves',
+            'sv': 'Spread out the vines',
+            'tv': 'Tie the vines to the trellis',
+            'tl': 'Trim the lower leaves'
+          }[abbrev];
+        }
+
+        renderTend(tend) {
+          const data = this.props.data[this.props.state][tend];
+
+          return (<tr key={tend}>
+            <td>{this.tendAction(tend)}</td>
+            <td>&nbsp;</td>
+            <td>{data.a}</td>
+            <td>{data.c}</td>
+            <td>{data.g}</td>
+            <td>{data.q}</td>
+            <td>{data.k}</td>
+            <td>{data.s}</td>
+            <td>{data.v}</td>
+          </tr>);
         }
 
         render() {
-          return (<div>
+          console.log('render');
+          const data = ['as', 'mg', 'po', 'sl', 'sv', 'tv', 'tl'].map((tend) => {
+            return this.renderTend(tend);
+          });
+
+          return (<div className="tend-table">
             {this.header()}
             <table>
               <thead><tr>
@@ -284,17 +336,7 @@
                 <th>Vigor</th>
               </tr></thead>
               <tbody>
-                <tr>
-                  <td>Aerate the soil</td>
-                  <td>&nbsp;</td>
-                  <td>2</td>
-                  <td>6</td>
-                  <td>7</td>
-                  <td>1</td>
-                  <td>-9</td>
-                  <td>-2</td>
-                  <td>-2</td>
-                </tr>
+                {data}
               </tbody>
             </table>
           </div>);
@@ -302,17 +344,57 @@
       }
 
       class GrapeDesignerComponent extends React.Component {
+        constructor(props) {
+          super(props);
+
+          this.grape = _.find(this.props.grapes, (grape) => {
+            return grape.name == this.props.ux.currentMain
+          });
+
+          if (_.isNil(this.grape)) {
+            this.grape = this.props.grapes[0];
+            this.props.changeListing(this.grape.name);
+          }
+
+          _.bindAll(this, [
+            'changeStartingNumber'
+          ]);
+        }
+
+        changeStartingNumber(evt) {
+          this.props.changeStartingNumber(this.grape.name, evt.target.valueAsNumber);
+        }
+
         render() {
+          const tendTables =
+            ['sagging', 'wilting', 'musty', 'fat', 'rustle', 'shrivel', 'shimmer'].map(
+            (state) => {
+              return <TendTable key={state} state={state} data={this.grape} />
+            });
+
           return (<div id="grape-main" className="main">
             <div>Name: <input type="text" /></div>
             <div>URL: <input type="text" /></div>
-            <div>Starting Grapes: <input type="number" min="0" step="1" /></div>
+            <div>Starting Grapes:
+              <input
+              type="number" min="0" step="1"
+              onChange={this.changeStartingNumber}
+              value={this.grape.starting} />
+            </div>
 
-            <TendTable state="fat" />
+            {tendTables}
           </div>);
         }
       }
-      const GrapeDesign = ReactRedux.connect((state) => state)(GrapeDesignerComponent);
+      const GrapeDesign = ReactRedux.connect(
+        (state) => state,
+        (dispatch) => { return {
+          changeListing: (listing) => { store.dispatch({ type: 'CHANGE_LISTING', listing }); },
+          changeStartingNumber: (grape, starting) => {
+            store.dispatch({ type: 'CHANGE_STARTING_NUMBER', grape, starting });
+          }
+        }}
+      )(GrapeDesignerComponent);
 
       class GrapeView extends React.Component {
         render() {
