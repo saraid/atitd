@@ -1,0 +1,367 @@
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Vineyard Simulator</title>
+    <script src="https://unpkg.com/react@16.2.0/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@16.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/lodash@4.17.4/lodash.min.js"></script>
+    <script src="https://unpkg.com/redux@3.7.2/dist/redux.min.js"></script>
+    <script src="https://unpkg.com/react-redux@5.0.6/dist/react-redux.min.js"></script>
+    <script src="https://unpkg.com/classnames@2.2.5/index.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+    <style type="text/css">
+      #app {
+        height: 100%;
+      }
+
+      #header {
+        width: 100%;
+        border-bottom: solid 1px black;
+      }
+
+      #header .tab {
+        display: inline-block;
+        margin-left: 1em;
+        padding: 0.3em;
+        border: solid 1px black;
+        border-bottom: 0;
+        cursor: pointer;
+      }
+
+      #header .tab.selected {
+        background-color: lightblue;
+      }
+
+      .view {
+        height: 100%;
+        width: 100%;
+        display: flex;
+      }
+
+      .sidebar {
+        width: 15em;
+        height: 100%;
+        background-color: lightgray;
+      }
+
+      .listing {
+        padding: 0.4em;
+        border-bottom: dotted 1px darkgray;
+        cursor: pointer;
+      }
+
+      .listing:hover {
+        font-weight: bold;
+      }
+
+      .listing.selected {
+        background-color: lightblue;
+      }
+
+      .main {
+        padding: 0.5em;
+      }
+
+      .vineyard {
+        margin-top: 1.5em;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/babel">
+      const initialState = {
+        grapes: [
+          {
+            name: 'blah blah blah',
+            states: []
+          }
+        ],
+        vineyards: [
+          {
+            name: 'sample whatever extende extende extende extende extende extende extendeddddddd',
+            states: []
+          }
+        ],
+        ux: {
+          currentTab: 'grapes',
+          currentMain: null
+        }
+      };
+
+      function vineyardApp(state = initialState, action) {
+        console.log(action.type, action);
+        switch(action.type) {
+          case 'CHANGE_LISTING':
+            return _.assign({}, state, { ux: _.assign({}, state.ux, { currentMain: action.listing }) });
+          case 'CHANGE_TAB':
+            return _.assign({}, state, { ux: _.assign({}, state.ux, { currentTab: action.tab }) });
+          default: return state;
+        }
+      };
+      let store = Redux.createStore(vineyardApp);
+
+      const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
+
+      class ListingComponent extends React.Component {
+        render() {
+          const handle = () => {
+            this.props.changeListing(this.props.name);
+          };
+
+          const classes = classNames({
+            listing: true,
+            selected: this.props.name == this.props.ux.currentMain
+          });
+
+          return (<div
+            className={classes}
+            onClick={handle}
+            title={this.props.name}>
+            {this.props.name}
+          </div>);
+        }
+      }
+      const Listing = ReactRedux.connect(
+        (state) => state,
+        (dispatch) => { return {
+          changeListing: (listing) => { store.dispatch({ type: 'CHANGE_LISTING', listing }); }
+        }}
+      )(ListingComponent);
+
+      class VineyardListComponent extends React.Component {
+        render() {
+          const vineyards = this.props.vineyards.map((vineyard) => {
+            return <Listing key={vineyard.name} {...vineyard} />
+          });
+
+          return (<div id="vineyard-list" className="sidebar">
+            {vineyards}
+            <div className="vineyard-listing listing new-listing">
+              + create new
+            </div>
+          </div>);
+        }
+      }
+      const VineyardList = ReactRedux.connect((state) => state)(VineyardListComponent);
+
+      class CultivationStep extends React.Component {
+        vineyardStates() {
+          return [
+            'The vines are sagging a bit',
+            'Leaves are wilting',
+            'A musty smell can be detected',
+            'Stems look especially fat',
+            'Leaves rustle in the breeze',
+            'The grapes are starting to shrivel',
+            'Leaves shimmer with moisture'
+          ].map((state) => {
+            return <option key={state}>{state}</option>;
+          });
+        }
+
+        tendActions() {
+          return [
+            '',
+            'Aerate the soil',
+            'Mist the grapes',
+            'Pinch off the weakest stems',
+            'Shade the leaves',
+            'Spread out the vines',
+            'Tie the vines to the trellis',
+            'Trim the lower leaves'
+          ].map((state) => { return <option key={state}>{state}</option>; });
+        }
+
+        render() {
+          this.thing = 0;
+          return (<tr>
+            <td><select>{this.vineyardStates()}</select></td>
+            <td><select>{this.tendActions()}</select></td>
+            <td>&nbsp;</td>
+            <td>{this.thing}</td>
+            <td>{this.thing}</td>
+            <td>{this.thing}</td>
+            <td>{this.thing}</td>
+            <td>{this.thing}</td>
+            <td>{this.thing}</td>
+            <td>{this.thing}</td>
+          </tr>);
+        }
+      }
+
+      class Vineyard extends React.Component {
+        render() {
+          const cultivationSteps = [null, null, null].map((step, index) => {
+            return <CultivationStep key={index} />
+          });
+
+          return (<table className="vineyard">
+            <thead><tr>
+              <th>State</th>
+              <th>Tending Action</th>
+              <th>&nbsp;</th>
+              <th>Acid</th>
+              <th>Color</th>
+              <th>Grapes</th>
+              <th>Quality</th>
+              <th>Skin</th>
+              <th>Sugar</th>
+              <th>Vigor</th>
+            </tr></thead>
+            <tbody>
+              {cultivationSteps}
+            </tbody>
+          </table>);
+        }
+      }
+
+      class VineyardDesignerComponent extends React.Component {
+        render() {
+          return (<div id="vineyard-main" className="main">
+            <div>Name: <input type="text" /></div>
+            <div>Grape: <select><option>Pascalito#356</option></select> (details)</div>
+            <div>Strategy: <select><option>Custom</option></select></div>
+
+            <Vineyard />
+          </div>);
+        }
+      }
+      const VineyardDesign = ReactRedux.connect((state) => state)(VineyardDesignerComponent);
+
+      class VineyardView extends React.Component {
+        render() {
+          return(<div id="vineyard-view" className="view">
+            <VineyardList />
+            <VineyardDesign />
+          </div>);
+        }
+      }
+
+      class GrapeListComponent extends React.Component {
+        render() {
+          const grapes = this.props.grapes.map((grape) => {
+            return <Listing key={grape.name} {...grape} />
+          });
+
+          return (<div id="grape-list" className="sidebar">
+            {grapes}
+            <div className="grape-listing listing new-listing">
+              + create new
+            </div>
+          </div>);
+        }
+      }
+      const GrapeList = ReactRedux.connect((state) => state)(GrapeListComponent);
+
+      class TendTable extends React.Component {
+        header() {
+          const map = {
+            'sag': 'The vines are sagging a bit',
+            'wilt': 'Leaves are wilting',
+            'musty': 'A musty smell can be detected',
+            'fat': 'Stems look especially fat',
+            'rustle': 'Leaves rustle in the breeze',
+            'shrivel': 'The grapes are starting to shrivel',
+            'shimmer': 'Leaves shimmer with moisture'
+          }[this.props.state];
+          return (<div>{capitalize(this.props.state)}: ({map})</div>);
+        }
+
+        render() {
+          return (<div>
+            {this.header()}
+            <table>
+              <thead><tr>
+                <th>Tending Action</th>
+                <th>&nbsp;</th>
+                <th>Acid</th>
+                <th>Color</th>
+                <th>Grapes</th>
+                <th>Quality</th>
+                <th>Skin</th>
+                <th>Sugar</th>
+                <th>Vigor</th>
+              </tr></thead>
+              <tbody>
+                <tr>
+                  <td>Aerate the soil</td>
+                  <td>&nbsp;</td>
+                  <td>2</td>
+                  <td>6</td>
+                  <td>7</td>
+                  <td>1</td>
+                  <td>-9</td>
+                  <td>-2</td>
+                  <td>-2</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>);
+        }
+      }
+
+      class GrapeDesignerComponent extends React.Component {
+        render() {
+          return (<div id="grape-main" className="main">
+            <div>Name: <input type="text" /></div>
+            <div>URL: <input type="text" /></div>
+            <div>Starting Grapes: <input type="number" min="0" step="1" /></div>
+
+            <TendTable state="fat" />
+          </div>);
+        }
+      }
+      const GrapeDesign = ReactRedux.connect((state) => state)(GrapeDesignerComponent);
+
+      class GrapeView extends React.Component {
+        render() {
+          return(<div id="grape-view" className="view">
+            <GrapeList />
+            <GrapeDesign />
+          </div>);
+        }
+      }
+
+      class ApplicationComponent extends React.Component {
+        render() {
+          const tabs = [ 'Barrels', 'Vineyards', 'Grapes' ].map((tab) => {
+            const key = tab.toLowerCase();
+            const handle = () => { this.props.changeTab(key); };
+            const classes = classNames({ tab: true, selected: this.props.ux.currentTab == key });
+            return (<div key={key} className={classes} onClick={handle}>
+              {tab}
+            </div>);
+          });
+
+          const view = {
+            'barrels': () => <GrapeView />,
+            'grapes': () => <GrapeView />,
+            'vineyards': () => <VineyardView />,
+          }[this.props.ux.currentTab]();
+
+          return(<div id="app">
+            <div id="header">
+              Manage:
+              {tabs}
+            </div>
+            {view}
+          </div>);
+        }
+      }
+      const Application = ReactRedux.connect(
+        (state) => state,
+        (dispatch) => { return {
+          changeTab: (tab) => { store.dispatch({ type: 'CHANGE_TAB', tab }); }
+        }}
+      )(ApplicationComponent);
+
+      ReactDOM.render(
+        <ReactRedux.Provider store={store}>
+          <Application />
+        </ReactRedux.Provider> ,
+        document.getElementById('root')
+      );
+    </script>
+  </body>
+</html>
