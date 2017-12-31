@@ -89,23 +89,28 @@
           {
             name: 'sample whatever extende extende extende extende extende extende extendeddddddd',
             grape: null,
-            states: []
+            states: [],
+            steps: []
           }
         ],
+        barrels: [
+          { name: 'meh' }
+        ],
         ux: {
-          currentTab: 'grapes',
+          currentTab: 'vineyards',
           currentMain: null
         }
       };
 
       if (_.isNil(initialState.ux.currentMain)) {
-        initialState.ux.currentMain = initialState.grapes[0].name;
+        initialState.ux.currentMain = initialState[initialState.ux.currentTab][0].name;
       }
 
       function vineyardApp(state = initialState, action) {
         console.log(action.type, action);
         switch(action.type) {
           case 'CHANGE_STARTING_NUMBER':
+          // Deprecated until I start doing grape modifying.
             return _.assign({}, state, {
               grapes: _.map(state.grapes, (grape) => {
                 if (grape.name == action.grape) {
@@ -115,16 +120,53 @@
                 }
               })
             });
+          case 'CHANGE_GRAPE':
+            return _.assign({}, state, {
+              vineyards: _.map(state.vineyards, (vineyard) => {
+                if (vineyard.name == action.vineyard) {
+                  return _.assign({}, vineyard, {
+                    grape: action.grape,
+                    steps: [{
+                      acid: 0,
+                      color: 0,
+                      grapes: _.find(state.grapes, (_grape) => {
+                        return _grape.name == action.grape;
+                      }).starting,
+                      quality: 0,
+                      skin: 0,
+                      sugar: 0,
+                      vigor: 100,
+                      step: 0
+                    }]
+                  });
+                } else {
+                  return _.assign({}, vineyard);
+                }
+              })
+            });
           case 'CHANGE_LISTING':
-            return _.assign({}, state, { ux: _.assign({}, state.ux, { currentMain: action.listing }) });
+            return _.assign({}, state, {
+              ux: _.assign({}, state.ux, {
+                currentMain: action.listing
+              })
+            });
           case 'CHANGE_TAB':
-            return _.assign({}, state, { ux: _.assign({}, state.ux, { currentTab: action.tab }) });
+            return _.assign({}, state, {
+              ux: _.assign({}, state.ux, {
+                currentTab: action.tab,
+                currentMain: initialState[action.tab][0].name
+              })
+            });
           default: return state;
         }
       };
       let store = Redux.createStore(vineyardApp);
 
       const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
+
+      const changeListing = (listing) => {
+        store.dispatch({ type: 'CHANGE_LISTING', listing });
+      };
 
       class ListingComponent extends React.Component {
         render() {
@@ -197,26 +239,25 @@
         }
 
         render() {
-          this.thing = 0;
           return (<tr>
             <td><select>{this.vineyardStates()}</select></td>
             <td><select>{this.tendActions()}</select></td>
             <td>&nbsp;</td>
-            <td>{this.thing}</td>
-            <td>{this.thing}</td>
-            <td>{this.thing}</td>
-            <td>{this.thing}</td>
-            <td>{this.thing}</td>
-            <td>{this.thing}</td>
-            <td>{this.thing}</td>
+            <td>{this.props.data.acid}</td>
+            <td>{this.props.data.color}</td>
+            <td>{this.props.data.grapes}</td>
+            <td>{this.props.data.quality}</td>
+            <td>{this.props.data.skin}</td>
+            <td>{this.props.data.sugar}</td>
+            <td>{this.props.data.vigor}</td>
           </tr>);
         }
       }
 
       class Vineyard extends React.Component {
         render() {
-          const cultivationSteps = [null, null, null].map((step, index) => {
-            return <CultivationStep key={index} />
+          const cultivationSteps = this.props.vineyard.steps.map((step, index) => {
+            return <CultivationStep key={index} data={step} />
           });
 
           return (<table className="vineyard">
@@ -249,6 +290,7 @@
         }
 
         changeGrape(evt) {
+          this.props.changeGrape(this.vineyard.name, evt.target.value);
         }
 
         grapeList() {
@@ -265,16 +307,17 @@
           });
 
           return (<div id="vineyard-main" className="main">
-            <div>Name: <input type="text" /></div>
+            <div>Name: <input type="text" value={this.vineyard.name} /></div>
             <div>Grape:
               <select onChange={this.changeGrape}>
+                <option></option>
                 {this.grapeList()}
               </select>
               (details)
             </div>
             <div>Strategy: <select><option>Custom</option></select></div>
 
-            <Vineyard />
+            <Vineyard vineyard={this.vineyard} />
           </div>);
         }
       }
@@ -282,6 +325,7 @@
         (state) => state,
         (dispatch) => { return {
           changeGrape: (vineyard, grape) => {
+            store.dispatch({ type: 'CHANGE_GRAPE', vineyard, grape });
           }
         }}
       )(VineyardDesignerComponent);
@@ -305,7 +349,7 @@
       const VineyardView = ReactRedux.connect(
         (state) => state,
         (dispatch) => { return {
-          changeListing: (listing) => { store.dispatch({ type: 'CHANGE_LISTING', listing }); }
+          changeListing
         }}
       )(VineyardViewComponent);
 
@@ -438,7 +482,7 @@
       const GrapeDesign = ReactRedux.connect(
         (state) => state,
         (dispatch) => { return {
-          changeListing: (listing) => { store.dispatch({ type: 'CHANGE_LISTING', listing }); },
+          changeListing,
           changeStartingNumber: (grape, starting) => {
             store.dispatch({ type: 'CHANGE_STARTING_NUMBER', grape, starting });
           }
@@ -466,7 +510,7 @@
       const GrapeView = ReactRedux.connect(
         (state) => state,
         (dispatch) => { return {
-          changeListing: (listing) => { store.dispatch({ type: 'CHANGE_LISTING', listing }); }
+          changeListing
         }}
       )(GrapeViewComponent);
 
@@ -505,7 +549,9 @@
       const Application = ReactRedux.connect(
         (state) => state,
         (dispatch) => { return {
-          changeTab: (tab) => { store.dispatch({ type: 'CHANGE_TAB', tab }); }
+          changeTab: (tab) => {
+            store.dispatch({ type: 'CHANGE_TAB', tab });
+          }
         }}
       )(ApplicationComponent);
 
