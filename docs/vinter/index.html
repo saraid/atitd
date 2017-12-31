@@ -33,14 +33,13 @@
       }
 
       .view {
-        height: 100%;
+        min-height: 100%;
         width: 100%;
         display: flex;
       }
 
       .sidebar {
         width: 15em;
-        height: 100%;
         background-color: lightgray;
       }
 
@@ -64,6 +63,12 @@
 
       .vineyard {
         margin-top: 1.5em;
+      }
+
+      .show-grape-detail {
+        display: inline-block;
+        margin-left: 0.5em;
+        cursor: pointer;
       }
 
       .tend-table {
@@ -154,7 +159,7 @@
             return _.assign({}, state, {
               ux: _.assign({}, state.ux, {
                 currentTab: action.tab,
-                currentMain: initialState[action.tab][0].name
+                currentMain: action.main || initialState[action.tab][0].name
               })
             });
           default: return state;
@@ -166,6 +171,10 @@
 
       const changeListing = (listing) => {
         store.dispatch({ type: 'CHANGE_LISTING', listing });
+      };
+
+      const changeTab = (tab, main = null) => {
+        store.dispatch({ type: 'CHANGE_TAB', tab, main });
       };
 
       class ListingComponent extends React.Component {
@@ -285,7 +294,7 @@
           super(props);
 
           _.bindAll(this, [
-            'changeGrape'
+            'changeGrape', 'showDetails'
           ]);
         }
 
@@ -301,10 +310,22 @@
           });
         }
 
+        showDetails(evt) {
+          changeTab('grapes', this.vineyard.grape);
+        }
+
         render() {
           this.vineyard = _.find(this.props.vineyards, (vineyard) => {
             return vineyard.name == this.props.vineyard;
           });
+
+          const grapeDetail = (() => {
+            if (_.isNil(this.vineyard.grape)) { return; }
+            return (<span
+              className="show-grape-detail"
+              onClick={this.showDetails}>(details)
+            </span>);
+          })();
 
           return (<div id="vineyard-main" className="main">
             <div>Name: <input type="text" value={this.vineyard.name} /></div>
@@ -313,7 +334,7 @@
                 <option></option>
                 {this.grapeList()}
               </select>
-              (details)
+              {grapeDetail}
             </div>
             <div>Strategy: <select><option>Custom</option></select></div>
 
@@ -549,9 +570,7 @@
       const Application = ReactRedux.connect(
         (state) => state,
         (dispatch) => { return {
-          changeTab: (tab) => {
-            store.dispatch({ type: 'CHANGE_TAB', tab });
-          }
+          changeTab
         }}
       )(ApplicationComponent);
 
