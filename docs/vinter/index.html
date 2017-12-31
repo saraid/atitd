@@ -32,6 +32,11 @@
         background-color: lightblue;
       }
 
+      #header #header-info {
+        display: inline-block;
+        margin-left: 1em;
+      }
+
       .view {
         min-height: 100%;
         width: 100%;
@@ -94,7 +99,7 @@
           {
             name: 'sample whatever extende extende extende extende extende extende extendeddddddd',
             grape: null,
-            states: [],
+            states: null,
             steps: []
           }
         ],
@@ -122,6 +127,31 @@
                   return _.assign({}, grape, { starting: action.starting });
                 } else {
                   return _.assign({}, grape);
+                }
+              })
+            });
+          case 'UPDATE_VINEYARD_STATE':
+            return _.assign({}, state, {
+              vineyards: _.map(state.vineyards, (vineyard) => {
+                if (vineyard.name == action.vineyard) {
+                  let states = _.map(vineyard.states, _.identity);
+                  states[action.index] = action.state
+                  return _.assign({}, vineyard, { states });
+                } else {
+                  return vineyard;
+                }
+              })
+            });
+          case 'ADD_STATES':
+            return _.assign({}, state, {
+              vineyards: _.map(state.vineyards, (vineyard) => {
+                if (vineyard.name == action.vineyard) {
+                  let states = _.map(vineyard.states, _.identity);
+                  if (states.length == 0) { states.push(null); }
+                  _(action.num).times(() => states.push(null));
+                  return _.assign({}, vineyard, { states });
+                } else {
+                  return vineyard;
                 }
               })
             });
@@ -156,10 +186,19 @@
               })
             });
           case 'CHANGE_TAB':
+            const main = (() => {
+              if (action.main) {
+                return action.main;
+              }
+              if (_.has(initialState, action.tab )) {
+                return initialState[action.tab][0].name;
+              }
+              return null;
+            })();
             return _.assign({}, state, {
               ux: _.assign({}, state.ux, {
                 currentTab: action.tab,
-                currentMain: action.main || initialState[action.tab][0].name
+                currentMain: main
               })
             });
           default: return state;
@@ -219,7 +258,15 @@
       }
       const VineyardList = ReactRedux.connect((state) => state)(VineyardListComponent);
 
-      class CultivationStep extends React.Component {
+      class CultivationStepComponent extends React.Component {
+        constructor(props) {
+          super(props);
+
+          _.bindAll(this, [
+            'updateState', 'updateAction'
+          ]);
+        }
+
         vineyardStates() {
           return [
             'The vines are sagging a bit',
@@ -247,10 +294,25 @@
           ].map((state) => { return <option key={state}>{state}</option>; });
         }
 
+        updateState(evt) {
+          this.props.updateState(
+            this.props.vineyard,
+            this.props.data.step,
+            evt.target.value
+          );
+        }
+
+        updateAction(evt) {
+        }
+
         render() {
           return (<tr>
-            <td><select>{this.vineyardStates()}</select></td>
-            <td><select>{this.tendActions()}</select></td>
+            <td><select onChange={this.updateState}>
+              {this.vineyardStates()}
+            </select></td>
+            <td><select onChange={this.updateAction}>
+              {this.tendActions()}
+            </select></td>
             <td>&nbsp;</td>
             <td>{this.props.data.acid}</td>
             <td>{this.props.data.color}</td>
@@ -262,17 +324,50 @@
           </tr>);
         }
       }
+      const CultivationStep = ReactRedux.connect(
+        (state) => state,
+        (dispatch) => { return {
+          updateState: (vineyard, index, state) => {
+            store.dispatch({ type: 'UPDATE_VINEYARD_STATE', vineyard, index, state });
+          }
+        }}
+      )(CultivationStepComponent);
 
-      class Vineyard extends React.Component {
-        render() {
-          const cultivationSteps = this.props.vineyard.steps.map((step, index) => {
-            return <CultivationStep key={index} data={step} />
+      class VineyardComponent extends React.Component {
+        constructor(props) {
+          super(props);
+        }
+
+        addMoreSteps(num) {
+          this.props.addStates(this.props.vineyard.name, num)
+        }
+
+        renderAddMoreSteps() {
+          const buttons = [ 1, 5, 10 ].map((num) => {
+            return (<button key={num} onClick={() => this.addMoreSteps(num)}>
+              +{num}
+            </button>);
           });
+          return (<tr>
+            <td>
+              {buttons}
+            </td>
+          </tr>);
+        }
+
+        render() {
+          const cultivationSteps = (this.props.vineyard.states || [null]).
+            map((state, index) => {
+              const step = this.props.vineyard.steps[index] || { step: index };
+              return <CultivationStep
+                key={index} vineyard={this.props.vineyard.name}
+                state={state} data={step} />
+            });
 
           return (<table className="vineyard">
             <thead><tr>
               <th>State</th>
-              <th>Tending Action</th>
+              <th>Action to Take</th>
               <th>&nbsp;</th>
               <th>Acid</th>
               <th>Color</th>
@@ -284,10 +379,19 @@
             </tr></thead>
             <tbody>
               {cultivationSteps}
+              {this.renderAddMoreSteps()}
             </tbody>
           </table>);
         }
       }
+      const Vineyard = ReactRedux.connect(
+        (state) => state,
+        (dispatch) => { return {
+          addStates: (vineyard, num) => {
+            store.dispatch({ type: 'ADD_STATES', vineyard, num });
+          }
+        }}
+      )(VineyardComponent);
 
       class VineyardDesignerComponent extends React.Component {
         constructor(props) {
@@ -538,27 +642,50 @@
         }
       }
 
+      class HelpView extends React.Component {
+        render() {
+          return (<div className="view">
+            Something about how to use stuff, plus a bunch of guides.
+          </div>);
+        }
+      }
+
+      class AboutView extends React.Component {
+        render() {
+          return (<div className="view">
+            Blah blah blah.
+          </div>);
+        }
+      }
+
       class ApplicationComponent extends React.Component {
         render() {
-          const tabs = [ 'Barrels', 'Vineyards', 'Grapes' ].map((tab) => {
+          const renderTab = (tab) => {
             const key = tab.toLowerCase();
             const handle = () => { this.props.changeTab(key); };
             const classes = classNames({ tab: true, selected: this.props.ux.currentTab == key });
             return (<div key={key} className={classes} onClick={handle}>
               {tab}
             </div>);
-          });
+          };
+
+          const tabs = [ 'Barrels', 'Vineyards', 'Grapes' ].map(renderTab);
+          const infos = [ 'Help', 'About' ].map(renderTab);
 
           const view = {
             'barrels': () => <BarrelView />,
             'grapes': () => <GrapeView />,
             'vineyards': () => <VineyardView />,
+            'help': () => <HelpView />,
+            'about': () => <AboutView />,
           }[this.props.ux.currentTab]();
 
           return(<div id="app">
             <div id="header">
               Manage:
               {tabs}
+              <div id="header-info">Info:</div>
+              {infos}
             </div>
             {view}
           </div>);
