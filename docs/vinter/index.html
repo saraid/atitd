@@ -88,6 +88,7 @@
         vineyards: [
           {
             name: 'sample whatever extende extende extende extende extende extende extendeddddddd',
+            grape: null,
             states: []
           }
         ],
@@ -239,6 +240,17 @@
       }
 
       class VineyardDesignerComponent extends React.Component {
+        constructor(props) {
+          super(props);
+
+          _.bindAll(this, [
+            'changeGrape'
+          ]);
+        }
+
+        changeGrape(evt) {
+        }
+
         grapeList() {
           return this.props.grapes.map((grape) => {
             return <option key={grape.name}>
@@ -248,25 +260,54 @@
         }
 
         render() {
+          this.vineyard = _.find(this.props.vineyards, (vineyard) => {
+            return vineyard.name == this.props.vineyard;
+          });
+
           return (<div id="vineyard-main" className="main">
             <div>Name: <input type="text" /></div>
-            <div>Grape: <select>{this.grapeList()}</select> (details)</div>
+            <div>Grape:
+              <select onChange={this.changeGrape}>
+                {this.grapeList()}
+              </select>
+              (details)
+            </div>
             <div>Strategy: <select><option>Custom</option></select></div>
 
             <Vineyard />
           </div>);
         }
       }
-      const VineyardDesign = ReactRedux.connect((state) => state)(VineyardDesignerComponent);
+      const VineyardDesign = ReactRedux.connect(
+        (state) => state,
+        (dispatch) => { return {
+          changeGrape: (vineyard, grape) => {
+          }
+        }}
+      )(VineyardDesignerComponent);
 
-      class VineyardView extends React.Component {
+      class VineyardViewComponent extends React.Component {
+        constructor(props) {
+          super(props);
+
+          if (_.isNil(this.props.ux.currentMain)) {
+            this.props.changeListing(this.props.vineyards[0].name);
+          }
+        }
+
         render() {
           return(<div id="vineyard-view" className="view">
             <VineyardList />
-            <VineyardDesign />
+            <VineyardDesign vineyard={this.props.ux.currentMain} />
           </div>);
         }
       }
+      const VineyardView = ReactRedux.connect(
+        (state) => state,
+        (dispatch) => { return {
+          changeListing: (listing) => { store.dispatch({ type: 'CHANGE_LISTING', listing }); }
+        }}
+      )(VineyardViewComponent);
 
       class GrapeListComponent extends React.Component {
         render() {
@@ -359,7 +400,6 @@
         constructor(props) {
           super(props);
 
-
           _.bindAll(this, [
             'changeStartingNumber'
           ]);
@@ -430,6 +470,12 @@
         }}
       )(GrapeViewComponent);
 
+      class BarrelView extends React.Component {
+        render() {
+          return <div>LOL have not even started</div>;
+        }
+      }
+
       class ApplicationComponent extends React.Component {
         render() {
           const tabs = [ 'Barrels', 'Vineyards', 'Grapes' ].map((tab) => {
@@ -442,7 +488,7 @@
           });
 
           const view = {
-            'barrels': () => <GrapeView />,
+            'barrels': () => <BarrelView />,
             'grapes': () => <GrapeView />,
             'vineyards': () => <VineyardView />,
           }[this.props.ux.currentTab]();
