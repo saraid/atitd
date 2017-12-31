@@ -478,7 +478,6 @@
           this.grape = _.find(this.props.grapes, (grape) => {
             return grape.name == this.props.grape;
           });
-          console.log('this.grape', this.grape);
 
           const tendTables =
             ['sagging', 'wilting', 'musty', 'fat', 'rustle', 'shrivel', 'shimmer'].map(
@@ -520,8 +519,6 @@
         }
 
         render() {
-          console.log(this.props.ux.currentMain);
-
           return(<div id="grape-view" className="view">
             <GrapeList />
             <GrapeDesign grape={this.props.ux.currentMain} />
