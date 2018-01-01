@@ -192,7 +192,7 @@
           { name: 'meh' }
         ],
         ux: {
-          currentTab: 'grapes',
+          currentTab: 'vineyards',
           currentMain: null
         }
       };
@@ -209,6 +209,35 @@
           _.has(initialState, initialState.ux.currentTab)) {
         initialState.ux.currentMain = initialState[initialState.ux.currentTab][0].id;
       }
+
+      const vineyardStrategies = [
+        {
+          name: 'Minimum Loss of Vigor',
+          evaluate: (state, grape) => {
+            return _.maxBy(_.keys(grape[state]), (tend) => grape[state][tend].v);
+          }
+        },
+        {
+          name: 'Maximum Gain of Grapes',
+          evaluate: (state, grape) => {
+            return _.maxBy(_.keys(grape[state]), (tend) => grape[state][tend].g);
+          }
+        },
+        {
+          name: 'Maximum Gain of Sugar',
+          evaluate: (state, grape) => {
+            return _.maxBy(_.keys(grape[state]), (tend) => grape[state][tend].s);
+          }
+        },
+        {
+          name: 'Maximum Gain of Color * Skin (Tannin)',
+          evaluate: (state, grape) => {
+            return _.maxBy(_.keys(grape[state]),
+              (tend) => grape[state][tend].c * grape[state][tend].k
+            );
+          }
+        }
+      ];
 
       function vineyardApp(state = initialState, action) {
         console.log(action.type, action);
@@ -274,6 +303,18 @@
                       vigor: 100,
                       step: 0
                     }]
+                  });
+                } else {
+                  return _.assign({}, vineyard);
+                }
+              })
+            });
+          case 'UPDATE_VINEYARD_STRATEGY':
+            return _.assign({}, state, {
+              vineyards: _.map(state.vineyards, (vineyard) => {
+                if (vineyard.id == action.vineyard) {
+                  return _.assign({}, vineyard, {
+                    strategy: action.strategy == 'Custom' ? null : action.strategy
                   });
                 } else {
                   return _.assign({}, vineyard);
@@ -463,9 +504,13 @@
 
       const runVineyardCultivation = () => {
         const currState = store.getState();
-        const currVineyard = _.find(currState.vineyards, (v) => {
-          return v.id == currState.ux.currentMain;
-        });
+        let currVineyard;
+        const refreshVineyardFromStore = () => {
+          currVineyard = _.find(store.getState().vineyards, (v) => {
+            return v.id == currState.ux.currentMain;
+          });
+        }
+        refreshVineyardFromStore();
 
         if (_.isNil(currVineyard)) { return; }
         if (_.isNil(currVineyard.grape)) { return; }
@@ -504,11 +549,15 @@
         if (!_.isNil(_.last(currVineyard.steps).tend) &&
             stepsUntilNilTend >= Math.max(1, _.size(currVineyard.states))) {
           store.dispatch({ type: 'ADD_STATES', vineyard: currVineyard.id, num: 1 });
+          refreshVineyardFromStore();
         }
 
         if (stepsUntilNilTend >= currVineyard.steps.length) {
           currVineyard.steps.push({ step: _.last(currVineyard.steps).step + 1 });
         }
+
+        const strategy = _.find(vineyardStrategies,
+          (strategy) => strategy.name == currVineyard.strategy);
 
         const cultivate = (previousStep, step) => {
           const tend = vineyardGrape[
@@ -530,8 +579,10 @@
           };
         };
 
-        const steps = _.reduce(currVineyard.steps,
-          (cultivation, step) => {
+        const steps = _.reduce(currVineyard.states,
+          (cultivation, state, index) => {
+            const step = currVineyard.steps[index];
+
             if (_.isNil(step)) {
               cultivation.push({ step: _.last(cultivation).step + 1 });
               return cultivation;
@@ -545,8 +596,23 @@
             const previousStep = _.last(cultivation);
 
             if (_.isNil(previousStep.tend)) {
-              cultivation.push(step);
-              return cultivation;
+              if (_.isNil(strategy)) {
+                cultivation.push(step);
+                return cultivation;
+              }
+
+              const action = _.invert(tendMap)[strategy.evaluate(
+                stateMap[currVineyard.states[previousStep.step]],
+                vineyardGrape
+              )];
+              store.dispatch({
+                type: 'UPDATE_VINEYARD_ACTION',
+                vineyard: currVineyard.id,
+                index: previousStep.step,
+                action
+              });
+              refreshVineyardFromStore();
+              previousStep.tend = action;
             }
 
             cultivation.push(cultivate(previousStep, step));
@@ -831,7 +897,7 @@
           super(props);
 
           _.bindAll(this, [
-            'changeGrape', 'updateName', 'showDetails'
+            'changeGrape', 'changeStrategy', 'updateName', 'showDetails'
           ]);
         }
 
@@ -845,6 +911,19 @@
               {grape.name}
             </option>
           });
+        }
+
+        changeStrategy(evt) {
+          this.props.changeStrategy(this.vineyard.id, evt.target.value);
+        }
+
+        strategyList() {
+          return _.tap(vineyardStrategies.map((strat) => {
+            return <option key={strat.name}
+              value={strat.name} selected={this.vineyard.strategy == strat.name}>
+                {strat.name}
+            </option>;
+          }), (list) => { list.unshift(<option>Custom</option>); });
         }
 
         updateName(evt) {
@@ -885,7 +964,11 @@
               </select>
               {grapeDetail}
             </div>
-            <div>Strategy: <select><option>Custom</option></select></div>
+            <div>Strategy:
+              <select onChange={this.changeStrategy}>
+                {this.strategyList()}
+              </select>
+            </div>
 
             <Vineyard vineyard={this.vineyard} />
           </div>);
@@ -896,6 +979,11 @@
         (dispatch) => { return {
           changeGrape: (vineyard, grape) => {
             store.dispatch({ type: 'UPDATE_VINEYARD_GRAPE', vineyard, grape });
+            runVineyardCultivation();
+          },
+          changeStrategy: (vineyard, strategy) => {
+            store.dispatch({ type: 'UPDATE_VINEYARD_STRATEGY', vineyard, strategy });
+            runVineyardCultivation();
           },
           updateName: (vineyard, name) => {
             store.dispatch({ type: 'UPDATE_VINEYARD_NAME', vineyard, name });
