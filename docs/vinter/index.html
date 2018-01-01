@@ -104,6 +104,7 @@
   <body>
     <div id="console">
       <button onClick="saveToLocalStorage()">Save</button>
+      <button onClick="clearLocalStorage()">Purge</button>
     </div>
     <div id="root"></div>
     <script type="text/babel">
@@ -142,6 +143,9 @@
 
       const loadFromLocalStorage = () => {
         let data = JSON.parse(window.localStorage.getItem(localStorageKey));
+        if (_.isNil(data)) {
+          return undefined;
+        }
 
         // Grapes
         data.grapes = data.grapes.map(
@@ -162,6 +166,10 @@
         // ...
 
         return data;
+      };
+
+      const clearLocalStorage = () => {
+        window.localStorage.removeItem(localStorageKey);
       };
 
       let initialState = {
@@ -190,9 +198,11 @@
 
       const fromLocalStorage = loadFromLocalStorage();
 
-      initialState.grapes = fromLocalStorage.grapes;
-      initialState.vineyards = fromLocalStorage.vineyards;
-      //initialState.barrels = fromLocalStorage.barrels;
+      if (fromLocalStorage) {
+        initialState.grapes = fromLocalStorage.grapes;
+        initialState.vineyards = fromLocalStorage.vineyards;
+        //initialState.barrels = fromLocalStorage.barrels;
+      }
 
       if (_.isNil(initialState.ux.currentMain) &&
           _.has(initialState, initialState.ux.currentTab)) {
