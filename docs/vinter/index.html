@@ -14,6 +14,12 @@
         height: 100%;
       }
 
+      #console {
+        position: fixed;
+        top: 5px;
+        right: 10px;
+      }
+
       #header {
         width: 100%;
         border-bottom: solid 1px black;
@@ -87,14 +93,72 @@
       }
 
       #grape-main input[type="number"] {
-        width: 30px;
+        width: 35px;
       }
     </style>
   </head>
   <body>
+    <div id="console">
+      <button onClick="saveToLocalStorage()">Save</button>
+    </div>
     <div id="root"></div>
     <script type="text/babel">
       const defaultState = 'The vines are sagging a bit';
+      const localStorageKey = 'atitd-vinter';
+
+      const saveToLocalStorage = () => {
+        let serializedData = {};
+
+        const state = store.getState();
+
+        // Grapes
+        serializedData.grapes = state.grapes.map((grape) => {
+          return _.omit(grape, 'id');
+        });
+
+        // Vineyards
+        serializedData.vineyards = state.vineyards.map((vineyard) => {
+          if (vineyard.grape) {
+            const serializedVineyard = _.assign({}, vineyard, {
+              grape: _.find(state.grapes, (grape) => {
+                return vineyard.grape == grape.id;
+              }).name
+            });
+            return _.omit(serializedVineyard, 'id');
+          } else {
+            return _.omit(vineyard, 'id');
+          }
+        });
+
+        // Barrels
+        // ...
+
+        window.localStorage.setItem(localStorageKey, JSON.stringify(serializedData));
+      };
+
+      const loadFromLocalStorage = () => {
+        let data = JSON.parse(window.localStorage.getItem(localStorageKey));
+
+        // Grapes
+        data.grapes = data.grapes.map(
+          (grape) => _.assign({}, grape, { id: _.uniqueId('grape') })
+        );
+
+        // Vineyards
+        data.vineyards = data.vineyards.map((vineyard) => {
+          let deserialized = _.assign({}, vineyard, { id: _.uniqueId('vineyard') })
+          if (deserialized.grape) {
+            deserialized.grape =
+              _.find(data.grapes, (grape) => grape.name == vineyard.grape).id;
+          }
+          return deserialized;
+        });
+
+        // Barrels
+        // ...
+
+        return data;
+      };
 
       let initialState = {
         grapes: [
@@ -115,10 +179,16 @@
           { name: 'meh' }
         ],
         ux: {
-          currentTab: 'about',
+          currentTab: 'grapes',
           currentMain: null
         }
       };
+
+      const fromLocalStorage = loadFromLocalStorage();
+
+      initialState.grapes = fromLocalStorage.grapes;
+      initialState.vineyards = fromLocalStorage.vineyards;
+      //initialState.barrels = fromLocalStorage.barrels;
 
       if (_.isNil(initialState.ux.currentMain) &&
           _.has(initialState, initialState.ux.currentTab)) {
@@ -247,6 +317,16 @@
                 }
               })
             });
+          case 'UPDATE_GRAPE_URL':
+            return _.assign({}, state, {
+              grapes: _.map(state.grapes, (grape) => {
+                if (grape.id == action.grape) {
+                  return _.assign({}, grape, { url: action.url });
+                } else {
+                  return _.assign({}, grape);
+                }
+              })
+            });
           case 'UPDATE_GRAPE_NAME':
             return _.assign({}, state, {
               grapes: _.map(state.grapes, (grape) => {
@@ -262,6 +342,19 @@
               ux: _.assign({}, state.ux, {
                 currentMain: action.listing
               })
+            });
+          case 'CREATE_LISTING':
+            return _.tap(_.assign({}, state, {
+              [state.ux.currentTab]: _.tap(
+                _.map(state[state.ux.currentTab], _.identity),
+                (listings) => listings.push(generateListing(state.ux.currentTab))
+              )
+            }), (newState) => {
+              _.assign(newState, {
+                ux: _.assign(newState.ux, {
+                  currentMain: _.last(newState[state.ux.currentTab]).id
+                })
+              });
             });
           case 'CHANGE_TAB':
             const main = (() => {
@@ -288,6 +381,40 @@
 
       const changeListing = (listing) => {
         store.dispatch({ type: 'CHANGE_LISTING', listing });
+      };
+
+      const createListing = () => {
+        store.dispatch({ type: 'CREATE_LISTING' });
+      };
+
+      const generateListing = (type) => {
+        switch (type) {
+          case 'vineyards':
+            return {
+              id: _.uniqueId('vineyard'),
+              name: 'New Vineyard',
+              grape: null,
+              cursor: 0,
+              states: [defaultState],
+              steps: []
+            };
+          case 'grapes':
+            const character = {"a":0,"c":-0,"g":0,"q":0,"k":0,"s":-0,"v":-0};
+            const tend = [ "as","mg","po","sl","sv","tv","tl" ];
+            const states =
+              ["fat","musty","rustle","sagging","shimmer","shrivel","wilting"];
+
+            let newGrape = {"starting":10,"name":"New Grape","id":_.uniqueId('grape')};
+
+            states.forEach((state) => {
+              _.assign(newGrape, {
+                [state]: _.zipObject(tend, _(7).times(_.constant(character)))
+                //_.zip(tend, _(7).times(_.constant(character)))
+              });
+            });
+
+            return newGrape;
+        }
       };
 
       const changeTab = (tab, main = null) => {
@@ -415,10 +542,22 @@
       }
       const Listing = ReactRedux.connect(
         (state) => state,
-        (dispatch) => { return {
-          changeListing: (listing) => { store.dispatch({ type: 'CHANGE_LISTING', listing }); }
-        }}
+        (dispatch) => { return { changeListing }; }
       )(ListingComponent);
+
+      class NewListingComponent extends React.Component {
+        render() {
+          return (
+            <div className="listing new-listing" onClick={this.props.createListing}>
+              + create new
+            </div>
+          );
+        }
+      }
+      const NewListing = ReactRedux.connect(
+        (state) => state,
+        (dispatch) => { return { createListing }; }
+      )(NewListingComponent);
 
       class VineyardListComponent extends React.Component {
         render() {
@@ -428,9 +567,7 @@
 
           return (<div id="vineyard-list" className="sidebar">
             {vineyards}
-            <div className="vineyard-listing listing new-listing">
-              + create new
-            </div>
+            <NewListing />
           </div>);
         }
       }
@@ -620,7 +757,7 @@
 
         grapeList() {
           return this.props.grapes.map((grape) => {
-            return <option key={grape.id} value={grape.id}>
+            return <option key={grape.id} value={grape.id} selected={grape.id == this.vineyard.grape}>
               {grape.name}
             </option>
           });
@@ -709,9 +846,7 @@
 
           return (<div id="grape-list" className="sidebar">
             {grapes}
-            <div className="grape-listing listing new-listing">
-              + create new
-            </div>
+            <NewListing />
           </div>);
         }
       }
@@ -822,16 +957,20 @@
           super(props);
 
           _.bindAll(this, [
-            'updateStarting', 'updateName'
+            'updateStarting', 'updateName', 'updateUrl'
           ]);
         }
 
         updateStarting(evt) {
-          this.props.changeStartingNumber(this.grape.id, evt.target.valueAsNumber);
+          this.props.updateStarting(this.grape.id, evt.target.valueAsNumber);
         }
 
         updateName(evt) {
           this.props.updateName(this.grape.id, evt.target.value);
+        }
+
+        updateUrl(evt) {
+          this.props.updateUrl(this.grape.id, evt.target.value);
         }
 
         render() {
@@ -852,7 +991,11 @@
                 onChange={this.updateName}
                 value={this.grape.name} />
             </div>
-            <div>URL: <input type="text" /></div>
+            <div>URL:
+              <input type="text"
+                onChange={this.updateUrl}
+                value={this.grape.url}/>
+            </div>
             <div>Starting Grapes:
               <input
               type="number" min="0" step="1"
@@ -868,8 +1011,11 @@
         (state) => state,
         (dispatch) => { return {
           changeListing,
-          changeStartingNumber: (grape, starting) => {
+          updateStarting: (grape, starting) => {
             store.dispatch({ type: 'UPDATE_GRAPE_STARTING', grape, starting });
+          },
+          updateUrl: (grape, url) => {
+            store.dispatch({ type: 'UPDATE_GRAPE_URL', grape, url });
           },
           updateName: (grape, name) => {
             store.dispatch({ type: 'UPDATE_GRAPE_NAME', grape, name });
@@ -920,10 +1066,6 @@
             <div>
               TODO:
               <ul>
-                <li>Save data to localStorage.</li>
-                <li>Import data from localStorage.</li>
-                <li>Allow creating new grapes.</li>
-                <li>Allow creating new vineyards.</li>
                 <li>Allow reordering the sidebar.</li>
                 <li>Allow deleting items from the sidebar.</li>
                 <li>Allow export/import of grapes.</li>
