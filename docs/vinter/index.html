@@ -90,6 +90,8 @@
   <body>
     <div id="root"></div>
     <script type="text/babel">
+      const defaultState = 'The vines are sagging a bit';
+
       let initialState = {
         grapes: [
           {"fat":{"as":{"a":2,"c":6,"g":7,"q":1,"k":-9,"s":-2,"v":-2},"mg":{"a":1,"c":4,"g":3,"q":3,"k":11,"s":-2,"v":-4},"po":{"a":2,"c":3,"g":4,"q":1,"k":15,"s":-3,"v":-6},"sl":{"a":-5,"c":8,"g":3,"q":-2,"k":16,"s":0,"v":-12},"sv":{"a":1,"c":-4,"g":-6,"q":-2,"k":12,"s":4,"v":-14},"tv":{"a":4,"c":2,"g":0,"q":1,"k":-6,"s":0,"v":-3},"tl":{"a":5,"c":-1,"g":-2,"q":3,"k":9,"s":-2,"v":-12}},"musty":{"as":{"a":1,"c":2,"g":2,"q":-3,"k":15,"s":1,"v":-5},"mg":{"a":6,"c":2,"g":3,"q":3,"k":7,"s":3,"v":-14},"po":{"a":5,"c":6,"g":5,"q":1,"k":-1,"s":2,"v":-12},"sl":{"a":7,"c":8,"g":-5,"q":1,"k":15,"s":1,"v":-9},"sv":{"a":8,"c":4,"g":6,"q":0,"k":8,"s":4,"v":-6},"tv":{"a":0,"c":4,"g":-6,"q":-1,"k":-11,"s":2,"v":-8},"tl":{"a":8,"c":-2,"g":-3,"q":0,"k":-11,"s":-2,"v":-3}},"rustle":{"as":{"a":4,"c":4,"g":-5,"q":0,"k":6,"s":2,"v":-9},"mg":{"a":7,"c":-3,"g":6,"q":3,"k":5,"s":1,"v":-6},"po":{"a":5,"c":-6,"g":2,"q":3,"k":16,"s":-2,"v":-1},"sl":{"a":0,"c":8,"g":1,"q":1,"k":13,"s":2,"v":-11},"sv":{"a":6,"c":-4,"g":-5,"q":-3,"k":-11,"s":-1,"v":-4},"tv":{"a":-5,"c":0,"g":-6,"q":-2,"k":8,"s":-2,"v":-4},"tl":{"a":7,"c":1,"g":-5,"q":-3,"k":14,"s":0,"v":-5}},"sagging":{"as":{"a":4,"c":-2,"g":1,"q":0,"k":-8,"s":2,"v":-10},"mg":{"a":2,"c":-3,"g":2,"q":-3,"k":14,"s":0,"v":-5},"po":{"a":3,"c":-6,"g":-4,"q":1,"k":1,"s":3,"v":-9},"sl":{"a":-6,"c":2,"g":7,"q":4,"k":-6,"s":4,"v":-10},"sv":{"a":-6,"c":-1,"g":-4,"q":1,"k":5,"s":-3,"v":-10},"tv":{"a":-2,"c":6,"g":3,"q":2,"k":6,"s":3,"v":-10},"tl":{"a":-6,"c":4,"g":0,"q":1,"k":6,"s":-2,"v":-7}},"shimmer":{"as":{"a":-6,"c":0,"g":-2,"q":1,"k":4,"s":3,"v":-1},"mg":{"a":-4,"c":-3,"g":2,"q":-1,"k":5,"s":-1,"v":-9},"po":{"a":2,"c":8,"g":-1,"q":4,"k":-3,"s":-3,"v":-1},"sl":{"a":-5,"c":-1,"g":-2,"q":2,"k":-11,"s":-2,"v":-2},"sv":{"a":-3,"c":6,"g":8,"q":0,"k":11,"s":-3,"v":-10},"tv":{"a":0,"c":1,"g":4,"q":2,"k":-9,"s":0,"v":-14},"tl":{"a":3,"c":-4,"g":-4,"q":0,"k":4,"s":-2,"v":-10}},"shrivel":{"as":{"a":6,"c":-5,"g":2,"q":4,"k":9,"s":3,"v":-7},"mg":{"a":-2,"c":1,"g":-4,"q":-3,"k":-12,"s":-3,"v":-13},"po":{"a":-2,"c":4,"g":-3,"q":-1,"k":3,"s":4,"v":-6},"sl":{"a":8,"c":-3,"g":4,"q":3,"k":14,"s":1,"v":-6},"sv":{"a":5,"c":-2,"g":7,"q":4,"k":16,"s":2,"v":-9},"tv":{"a":-2,"c":4,"g":-6,"q":2,"k":1,"s":2,"v":-12},"tl":{"a":-4,"c":-1,"g":2,"q":4,"k":-1,"s":-1,"v":-2}},"wilting":{"as":{"a":-2,"c":5,"g":-2,"q":1,"k":4,"s":4,"v":-9},"mg":{"a":3,"c":5,"g":6,"q":2,"k":-2,"s":2,"v":-8},"po":{"a":2,"c":2,"g":-1,"q":4,"k":-7,"s":-3,"v":-11},"sl":{"a":-3,"c":3,"g":3,"q":-3,"k":-11,"s":0,"v":-12},"sv":{"a":8,"c":8,"g":0,"q":0,"k":10,"s":-1,"v":-14},"tv":{"a":5,"c":8,"g":2,"q":4,"k":8,"s":4,"v":-6},"tl":{"a":4,"c":5,"g":-1,"q":0,"k":13,"s":4,"v":-5}},"starting":11,"name":"Pascalito#356"},
@@ -99,7 +101,8 @@
           {
             name: 'sample whatever extende extende extende extende extende extende extendeddddddd',
             grape: null,
-            states: null,
+            cursor: 0,
+            states: [defaultState],
             steps: []
           }
         ],
@@ -142,13 +145,30 @@
                 }
               })
             });
+          case 'UPDATE_VINEYARD_ACTION':
+            return _.assign({}, state, {
+              vineyards: _.map(state.vineyards, (vineyard) => {
+                if (vineyard.name == action.vineyard) {
+                  let steps = _.map(vineyard.steps, _.identity);
+                  if (_.isNil(steps[action.index])) {
+                    steps[action.index] = {
+                      step: action.index
+                    }
+                  }
+                  steps[action.index].tend = action.action
+                  return _.assign({}, vineyard, { steps });
+                } else {
+                  return vineyard;
+                }
+              })
+            });
           case 'ADD_STATES':
             return _.assign({}, state, {
               vineyards: _.map(state.vineyards, (vineyard) => {
                 if (vineyard.name == action.vineyard) {
                   let states = _.map(vineyard.states, _.identity);
-                  if (states.length == 0) { states.push(null); }
-                  _(action.num).times(() => states.push(null));
+                  if (states.length == 0) { states.push(defaultState); }
+                  _(action.num).times(() => states.push(defaultState));
                   return _.assign({}, vineyard, { states });
                 } else {
                   return vineyard;
@@ -162,6 +182,7 @@
                   return _.assign({}, vineyard, {
                     grape: action.grape,
                     steps: [{
+                      tend: null,
                       acid: 0,
                       color: 0,
                       grapes: _.find(state.grapes, (_grape) => {
@@ -174,6 +195,26 @@
                       step: 0
                     }]
                   });
+                } else {
+                  return _.assign({}, vineyard);
+                }
+              })
+            });
+          case 'UPDATE_VINEYARD_CURSOR':
+            return _.assign({}, state, {
+              vineyards: _.map(state.vineyards, (vineyard) => {
+                if (vineyard.name == action.vineyard) {
+                  return _.assign({}, vineyard, { cursor: action.cursor });
+                } else {
+                  return _.assign({}, vineyard);
+                }
+              })
+            });
+          case 'UPDATE_VINEYARD_CULTIVATION_STEPS':
+            return _.assign({}, state, {
+              vineyards: _.map(state.vineyards, (vineyard) => {
+                if (vineyard.name == action.vineyard) {
+                  return _.assign({}, vineyard, { steps: action.steps });
                 } else {
                   return _.assign({}, vineyard);
                 }
@@ -214,6 +255,106 @@
 
       const changeTab = (tab, main = null) => {
         store.dispatch({ type: 'CHANGE_TAB', tab, main });
+      };
+
+      const runVineyardCultivation = () => {
+        const currState = store.getState();
+        const currVineyard = _.find(currState.vineyards, (v) => {
+          return v.name == currState.ux.currentMain;
+        });
+
+        if (_.isNil(currVineyard)) { return; }
+        if (_.isNil(currVineyard.grape)) { return; }
+
+        const vineyardGrape = _.find(currState.grapes, (g) => {
+          return g.name == currVineyard.grape;
+        });
+
+        const stateMap = _.invert({
+          'sagging': 'The vines are sagging a bit',
+          'wilting': 'Leaves are wilting',
+          'musty': 'A musty smell can be detected',
+          'fat': 'Stems look especially fat',
+          'rustle': 'Leaves rustle in the breeze',
+          'shrivel': 'The grapes are starting to shrivel',
+          'shimmer': 'Leaves shimmer with moisture'
+        });
+
+        const tendMap = _.invert({
+          'as': 'Aerate the soil',
+          'mg': 'Mist the grapes',
+          'po': 'Pinch off the weakest stems',
+          'sl': 'Shade the leaves',
+          'sv': 'Spread out the vines',
+          'tv': 'Tie the vines to the trellis',
+          'tl': 'Trim the lower leaves'
+        });
+
+        const stepsUntilNilTend = (() => {
+          const index = _.findIndex(currVineyard.steps, (vStep) => {
+            return _.isNil(vStep.tend);
+          })
+          return index == -1 ? currVineyard.steps.length-1 : index;
+        })() + 1;
+
+        if (!_.isNil(_.last(currVineyard.steps).tend) &&
+            stepsUntilNilTend >= Math.max(1, _.size(currVineyard.states))) {
+          store.dispatch({ type: 'ADD_STATES', vineyard: currVineyard.name, num: 1 });
+        }
+
+        if (stepsUntilNilTend >= currVineyard.steps.length) {
+          currVineyard.steps.push({ step: _.last(currVineyard.steps).step + 1 });
+        }
+
+        const cultivate = (previousStep, step) => {
+          const tend = vineyardGrape[
+            stateMap[currVineyard.states[previousStep.step]]
+          ][
+            tendMap[previousStep.tend]
+          ];
+
+          return {
+            tend: step.tend,
+            acid: Math.max(0, previousStep.acid + tend.a),
+            color: Math.max(0, previousStep.color + tend.c),
+            grapes: Math.max(0, previousStep.grapes + tend.g),
+            quality: Math.max(0, previousStep.quality + tend.q),
+            skin: Math.max(0, previousStep.skin + tend.k),
+            sugar: Math.max(0, previousStep.sugar + tend.s),
+            vigor: Math.max(0, previousStep.vigor + tend.v),
+            step: step.step
+          };
+        };
+
+        const steps = _.reduce(currVineyard.steps,
+          (cultivation, step) => {
+            if (_.isNil(step)) {
+              cultivation.push({ step: _.last(cultivation).step + 1 });
+              return cultivation;
+            }
+
+            if (step.step === 0) {
+              cultivation.push(step);
+              return cultivation;
+            }
+
+            const previousStep = _.last(cultivation);
+
+            if (_.isNil(previousStep.tend)) {
+              cultivation.push(step);
+              return cultivation;
+            }
+
+            cultivation.push(cultivate(previousStep, step));
+
+            return cultivation;
+          }, []);
+
+        store.dispatch({
+          type: 'UPDATE_VINEYARD_CULTIVATION_STEPS',
+          vineyard: currVineyard.name,
+          steps
+        });
       };
 
       class ListingComponent extends React.Component {
@@ -263,7 +404,8 @@
           super(props);
 
           _.bindAll(this, [
-            'updateState', 'updateAction'
+            'updateState', 'updateAction',
+            'setCursor'
           ]);
         }
 
@@ -277,7 +419,9 @@
             'The grapes are starting to shrivel',
             'Leaves shimmer with moisture'
           ].map((state) => {
-            return <option key={state}>{state}</option>;
+            return (<option key={state} selected={state == this.props.state}>
+              {state}
+            </option>);
           });
         }
 
@@ -291,7 +435,11 @@
             'Spread out the vines',
             'Tie the vines to the trellis',
             'Trim the lower leaves'
-          ].map((state) => { return <option key={state}>{state}</option>; });
+          ].map((action) => {
+            return (<option key={action} selected={action == this.props.data.tend}>
+              {action}
+            </option>);
+          });
         }
 
         updateState(evt) {
@@ -303,6 +451,23 @@
         }
 
         updateAction(evt) {
+          this.props.updateAction(
+            this.props.vineyard,
+            this.props.data.step,
+            evt.target.value
+          );
+        }
+
+        setCursor(evt) {
+          this.props.updateCursor(this.props.vineyard, this.props.data.step);
+        }
+
+        renderCursor() {
+          return (<input
+            type="radio" name="vineyard"
+            checked={this.props.data.step == this.props.cursor}
+            onClick={this.setCursor}
+            value={this.props.data.step} />);
         }
 
         render() {
@@ -321,6 +486,7 @@
             <td>{this.props.data.skin}</td>
             <td>{this.props.data.sugar}</td>
             <td>{this.props.data.vigor}</td>
+            <td>{this.renderCursor()}</td>
           </tr>);
         }
       }
@@ -329,6 +495,14 @@
         (dispatch) => { return {
           updateState: (vineyard, index, state) => {
             store.dispatch({ type: 'UPDATE_VINEYARD_STATE', vineyard, index, state });
+            runVineyardCultivation();
+          },
+          updateAction: (vineyard, index, action) => {
+            store.dispatch({ type: 'UPDATE_VINEYARD_ACTION', vineyard, index, action });
+            runVineyardCultivation();
+          },
+          updateCursor: (vineyard, cursor) => {
+            store.dispatch({ type: 'UPDATE_VINEYARD_CURSOR', vineyard, cursor });
           }
         }}
       )(CultivationStepComponent);
@@ -356,11 +530,12 @@
         }
 
         render() {
-          const cultivationSteps = (this.props.vineyard.states || [null]).
+          const cultivationSteps = (this.props.vineyard.states || [defaultState]).
             map((state, index) => {
               const step = this.props.vineyard.steps[index] || { step: index };
               return <CultivationStep
                 key={index} vineyard={this.props.vineyard.name}
+                cursor={this.props.vineyard.cursor}
                 state={state} data={step} />
             });
 
