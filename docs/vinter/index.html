@@ -1114,7 +1114,14 @@
       class HelpView extends React.Component {
         render() {
           return (<div className="view">
-            Something about how to use stuff, plus a bunch of guides.
+            <div>
+              Something about how to use stuff, plus a bunch of guides.
+              <br />
+              <br />
+              <a href="http://www.atitd.org/wiki/tale7/Wine">
+                http://www.atitd.org/wiki/tale7/Wine
+              </a>
+            </div>
           </div>);
         }
       }
@@ -1125,8 +1132,6 @@
             <div>
               TODO:
               <ul>
-                <li>Allow reordering the sidebar.</li>
-                <li>Allow deleting items from the sidebar.</li>
                 <li>Allow export/import of grapes.</li>
                 <li>Allow export/import of vineyards.</li>
                 <li>Create vineyard strategies.</li>
