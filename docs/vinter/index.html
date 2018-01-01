@@ -115,12 +115,13 @@
           { name: 'meh' }
         ],
         ux: {
-          currentTab: 'grapes',
+          currentTab: 'about',
           currentMain: null
         }
       };
 
-      if (_.isNil(initialState.ux.currentMain)) {
+      if (_.isNil(initialState.ux.currentMain) &&
+          _.has(initialState, initialState.ux.currentTab)) {
         initialState.ux.currentMain = initialState[initialState.ux.currentTab][0].id;
       }
 
@@ -916,7 +917,29 @@
       class AboutView extends React.Component {
         render() {
           return (<div className="view">
-            Blah blah blah.
+            <div>
+              TODO:
+              <ul>
+                <li>Save data to localStorage.</li>
+                <li>Import data from localStorage.</li>
+                <li>Allow creating new grapes.</li>
+                <li>Allow creating new vineyards.</li>
+                <li>Allow reordering the sidebar.</li>
+                <li>Allow deleting items from the sidebar.</li>
+                <li>Allow export/import of grapes.</li>
+                <li>Allow export/import of vineyards.</li>
+                <li>Create vineyard strategies.</li>
+                <li>Create concept of barrels.</li>
+              </ul>
+            </div>
+            <div>
+              Moonshot:
+              <ul>
+                <li>Allow reverting.</li>
+                <li>Track changes.</li>
+                <li>Allow undo/redo.</li>
+              </ul>
+            </div>
           </div>);
         }
       }
