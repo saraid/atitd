@@ -566,6 +566,20 @@
             tendMap[previousStep.tend]
           ];
 
+          if ((previousStep.vigor + tend.v) <= 0) {
+            return {
+              tend: step.tend,
+              step: step.step,
+              acid: '--',
+              color: '--',
+              grapes: '--',
+              quality: '--',
+              skin: '--',
+              sugar: '--',
+              vigor: '--'
+            };
+          }
+
           return {
             tend: step.tend,
             acid: Math.max(0, previousStep.acid + tend.a),
