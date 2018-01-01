@@ -85,6 +85,10 @@
         font-weight: bold;
         border-bottom: solid 1px black;
       }
+
+      #grape-main input[type="number"] {
+        width: 30px;
+      }
     </style>
   </head>
   <body>
@@ -217,6 +221,18 @@
                   return _.assign({}, vineyard, { steps: action.steps });
                 } else {
                   return _.assign({}, vineyard);
+                }
+              })
+            });
+          case 'UPDATE_GRAPE_NUMBER':
+            return _.assign({}, state, {
+              grapes: _.map(state.grapes, (grape) => {
+                if (grape.id == action.grape) {
+                  let clone = _.clone(grape)
+                  _.set(clone, action.path.join('.'), action.num);
+                  return clone;
+                } else {
+                  return _.assign({}, grape);
                 }
               })
             });
@@ -700,7 +716,19 @@
       }
       const GrapeList = ReactRedux.connect((state) => state)(GrapeListComponent);
 
-      class TendTable extends React.Component {
+      class TendTableComponent extends React.Component {
+        constructor(props) {
+          super(props);
+
+          _.bindAll(this, [
+            'updateNumber'
+          ]);
+        }
+
+        updateNumber(tend, characteristic, value) {
+          this.props.updateNumber(this.props.grape, [ this.props.state, tend, characteristic ], value);
+        }
+
         header() {
           const map = {
             'sagging': 'The vines are sagging a bit',
@@ -728,19 +756,28 @@
           }[abbrev];
         }
 
-        renderTend(tend) {
-          const data = this.props.data[this.props.state][tend];
+        renderNumber(tend, characteristic) {
+          const key=`${this.props.state}-${tend}-${characteristic}`;
+          const data = this.props.data[this.props.state][tend][characteristic];
 
+          return <input
+            type="number" step="1"
+            onChange={(evt) =>
+              this.updateNumber(tend, characteristic, evt.target.valueAsNumber)}
+            value={data} />;
+        }
+
+        renderTend(tend) {
           return (<tr key={tend}>
             <td>{this.tendAction(tend)}</td>
             <td>&nbsp;</td>
-            <td>{data.a}</td>
-            <td>{data.c}</td>
-            <td>{data.g}</td>
-            <td>{data.q}</td>
-            <td>{data.k}</td>
-            <td>{data.s}</td>
-            <td>{data.v}</td>
+            <td>{this.renderNumber(tend, 'a')}</td>
+            <td>{this.renderNumber(tend, 'c')}</td>
+            <td>{this.renderNumber(tend, 'g')}</td>
+            <td>{this.renderNumber(tend, 'q')}</td>
+            <td>{this.renderNumber(tend, 'k')}</td>
+            <td>{this.renderNumber(tend, 's')}</td>
+            <td>{this.renderNumber(tend, 'v')}</td>
           </tr>);
         }
 
@@ -770,6 +807,14 @@
           </div>);
         }
       }
+      const TendTable = ReactRedux.connect(
+        (state) => state,
+        (dispatch) => { return {
+          updateNumber: (grape, path, num) => {
+            store.dispatch({ type: 'UPDATE_GRAPE_NUMBER', grape, path, num });
+          }
+        }}
+      )(TendTableComponent);
 
       class GrapeDesignerComponent extends React.Component {
         constructor(props) {
@@ -796,7 +841,8 @@
           const tendTables =
             ['sagging', 'wilting', 'musty', 'fat', 'rustle', 'shrivel', 'shimmer'].map(
             (state) => {
-              return <TendTable key={state} state={state} data={this.grape} />
+              return <TendTable key={state}
+                grape={this.grape.id} state={state} data={this.grape} />
             });
 
           return (<div id="grape-main" className="main">
