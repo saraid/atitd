@@ -68,6 +68,10 @@
         background-color: lightblue;
       }
 
+      .listing .listing-options {
+        float: right;
+      }
+
       .main {
         padding: 0.5em;
       }
@@ -356,6 +360,31 @@
                 })
               });
             });
+          case 'REORDER_LISTING':
+            return (() => {
+              let clone = _.map(state[state.ux.currentTab], _.identity);
+              const index = _.findIndex(clone, (listing) => listing.id == action.id);
+              if (index >= 0) {
+                const mover = clone.splice(index, 1)[0];
+                clone.splice(action.index, 0, mover);
+              }
+              return _.assign({}, state, { [state.ux.currentTab]: clone });
+            })();
+          case 'REMOVE_LISTING':
+            return (() => {
+              let clone = _.map(state[state.ux.currentTab], _.identity);
+              let currentMain = state.ux.currentMain;
+              const index = _.findIndex(clone, (listing) => listing.id == action.id);
+              if (index >= 0) {
+                if (clone.splice(index, 1).id == state.ux.currentMain) {
+                  currentMain = clone[0].id;
+                }
+              }
+              return _.assign({}, state, {
+                [state.ux.currentTab]: clone,
+                ux: _.assign({}, state.ux, { currentMain })
+              });
+            })();
           case 'CHANGE_TAB':
             const main = (() => {
               if (action.main) {
@@ -521,6 +550,44 @@
         });
       };
 
+      class ListingOptionsComponent extends React.Component {
+        render() {
+          const listingIndex = _.findIndex(this.props[this.props.ux.currentTab],
+            (listing) => { return listing.id == this.props.id });
+
+          const goUp = () => {
+            this.props.reorderListing(this.props.id, listingIndex-1);
+          };
+          const goDown = () => {
+            this.props.reorderListing(this.props.id, listingIndex+1);
+          };
+          const remove = () => {
+            this.props.removeListing(this.props.id);
+          };
+
+          const firstListing = listingIndex == 0;
+          const lastListing =
+            listingIndex == this.props[this.props.ux.currentTab].length-1;
+
+          return (<div className="listing-options">
+            <button onClick={goUp} disabled={firstListing}>▲</button>
+            <button onClick={goDown} disabled={lastListing}>▼</button>
+            <button onClick={remove}>✘</button>
+          </div>);
+        }
+      }
+      const ListingOptions = ReactRedux.connect(
+        (state) => state,
+        (dispatch) => { return {
+          removeListing: (id) => {
+            dispatch({ type: 'REMOVE_LISTING', id });
+          },
+          reorderListing: (id, index) => {
+            dispatch({ type: 'REORDER_LISTING', id, index });
+          }
+        }; }
+      )(ListingOptionsComponent);
+
       class ListingComponent extends React.Component {
         render() {
           const handle = () => {
@@ -536,13 +603,19 @@
             className={classes}
             onClick={handle}
             title={this.props.name}>
+            <ListingOptions id={this.props.id} />
             {this.props.name}
           </div>);
         }
       }
       const Listing = ReactRedux.connect(
         (state) => state,
-        (dispatch) => { return { changeListing }; }
+        (dispatch) => { return {
+          changeListing,
+          startDragging: () => {
+            dispatch({ type: 'START_DRAGGING_LISTING' });
+          }
+        }; }
       )(ListingComponent);
 
       class NewListingComponent extends React.Component {
@@ -776,6 +849,10 @@
             return vineyard.id == this.props.vineyard;
           });
 
+          if (_.isNil(this.vineyard)) {
+            return (<div id="vineyard-main" className="main"></div>);
+          }
+
           const grapeDetail = (() => {
             if (_.isNil(this.vineyard.grape)) { return; }
             return (<span
@@ -816,14 +893,6 @@
       )(VineyardDesignerComponent);
 
       class VineyardViewComponent extends React.Component {
-        constructor(props) {
-          super(props);
-
-          if (_.isNil(this.props.ux.currentMain)) {
-            this.props.changeListing(this.props.vineyards[0].id);
-          }
-        }
-
         render() {
           return(<div id="vineyard-view" className="view">
             <VineyardList />
@@ -832,10 +901,7 @@
         }
       }
       const VineyardView = ReactRedux.connect(
-        (state) => state,
-        (dispatch) => { return {
-          changeListing
-        }}
+        (state) => state
       )(VineyardViewComponent);
 
       class GrapeListComponent extends React.Component {
@@ -978,6 +1044,10 @@
             return grape.id == this.props.grape;
           });
 
+          if (_.isNil(this.grape)) {
+            return (<div id="grape-main" className="main"></div>);
+          }
+
           const tendTables =
             ['sagging', 'wilting', 'musty', 'fat', 'rustle', 'shrivel', 'shimmer'].map(
             (state) => {
@@ -1024,14 +1094,6 @@
       )(GrapeDesignerComponent);
 
       class GrapeViewComponent extends React.Component {
-        constructor(props) {
-          super(props);
-
-          if (_.isNil(this.props.ux.currentMain)) {
-            this.props.changeListing(this.props.grapes[0].id);
-          }
-        }
-
         render() {
           return(<div id="grape-view" className="view">
             <GrapeList />
@@ -1040,10 +1102,7 @@
         }
       }
       const GrapeView = ReactRedux.connect(
-        (state) => state,
-        (dispatch) => { return {
-          changeListing
-        }}
+        (state) => state
       )(GrapeViewComponent);
 
       class BarrelView extends React.Component {
