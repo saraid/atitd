@@ -111,7 +111,7 @@
           { name: 'meh' }
         ],
         ux: {
-          currentTab: 'vineyards',
+          currentTab: 'grapes',
           currentMain: null
         }
       };
@@ -123,17 +123,6 @@
       function vineyardApp(state = initialState, action) {
         console.log(action.type, action);
         switch(action.type) {
-          case 'CHANGE_STARTING_NUMBER':
-          // Deprecated until I start doing grape modifying.
-            return _.assign({}, state, {
-              grapes: _.map(state.grapes, (grape) => {
-                if (grape.id == action.grape) {
-                  return _.assign({}, grape, { starting: action.starting });
-                } else {
-                  return _.assign({}, grape);
-                }
-              })
-            });
           case 'UPDATE_VINEYARD_STATE':
             return _.assign({}, state, {
               vineyards: _.map(state.vineyards, (vineyard) => {
@@ -176,7 +165,7 @@
                 }
               })
             });
-          case 'CHANGE_GRAPE':
+          case 'UPDATE_VINEYARD_GRAPE':
             return _.assign({}, state, {
               vineyards: _.map(state.vineyards, (vineyard) => {
                 if (vineyard.id == action.vineyard) {
@@ -228,6 +217,26 @@
                   return _.assign({}, vineyard, { steps: action.steps });
                 } else {
                   return _.assign({}, vineyard);
+                }
+              })
+            });
+          case 'UPDATE_GRAPE_STARTING':
+            return _.assign({}, state, {
+              grapes: _.map(state.grapes, (grape) => {
+                if (grape.id == action.grape) {
+                  return _.assign({}, grape, { starting: action.starting });
+                } else {
+                  return _.assign({}, grape);
+                }
+              })
+            });
+          case 'UPDATE_GRAPE_NAME':
+            return _.assign({}, state, {
+              grapes: _.map(state.grapes, (grape) => {
+                if (grape.id == action.grape) {
+                  return _.assign({}, grape, { name: action.name });
+                } else {
+                  return _.assign({}, grape);
                 }
               })
             });
@@ -374,7 +383,6 @@
             this.props.changeListing(this.props.id);
           };
 
-          console.log(this.props);
           const classes = classNames({
             listing: true,
             selected: this.props.id == this.props.ux.currentMain
@@ -595,7 +603,7 @@
 
         grapeList() {
           return this.props.grapes.map((grape) => {
-            return <option key={grape.id}>
+            return <option key={grape.id} value={grape.id}>
               {grape.name}
             </option>
           });
@@ -645,7 +653,7 @@
         (state) => state,
         (dispatch) => { return {
           changeGrape: (vineyard, grape) => {
-            store.dispatch({ type: 'CHANGE_GRAPE', vineyard, grape });
+            store.dispatch({ type: 'UPDATE_VINEYARD_GRAPE', vineyard, grape });
           },
           updateName: (vineyard, name) => {
             store.dispatch({ type: 'UPDATE_VINEYARD_NAME', vineyard, name });
@@ -768,12 +776,16 @@
           super(props);
 
           _.bindAll(this, [
-            'changeStartingNumber'
+            'updateStarting', 'updateName'
           ]);
         }
 
-        changeStartingNumber(evt) {
+        updateStarting(evt) {
           this.props.changeStartingNumber(this.grape.id, evt.target.valueAsNumber);
+        }
+
+        updateName(evt) {
+          this.props.updateName(this.grape.id, evt.target.value);
         }
 
         render() {
@@ -788,12 +800,16 @@
             });
 
           return (<div id="grape-main" className="main">
-            <div>Name: <input type="text" /></div>
+            <div>Name:
+              <input type="text"
+                onChange={this.updateName}
+                value={this.grape.name} />
+            </div>
             <div>URL: <input type="text" /></div>
             <div>Starting Grapes:
               <input
               type="number" min="0" step="1"
-              onChange={this.changeStartingNumber}
+              onChange={this.updateStarting}
               value={this.grape.starting} />
             </div>
 
@@ -806,7 +822,10 @@
         (dispatch) => { return {
           changeListing,
           changeStartingNumber: (grape, starting) => {
-            store.dispatch({ type: 'CHANGE_STARTING_NUMBER', grape, starting });
+            store.dispatch({ type: 'UPDATE_GRAPE_STARTING', grape, starting });
+          },
+          updateName: (grape, name) => {
+            store.dispatch({ type: 'UPDATE_GRAPE_NAME', grape, name });
           }
         }}
       )(GrapeDesignerComponent);
