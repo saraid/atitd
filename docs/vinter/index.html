@@ -82,12 +82,12 @@
         margin-top: 1.5em;
       }
 
-      #vineyard-main .vineyard-information {
+      .information {
         display: flex;
         justify-content: space-between;
       }
 
-      #vineyard-main .vineyard-information .vineyard-meta {
+      .information .meta {
         text-align: right;
       }
 
@@ -437,11 +437,11 @@
                 }
               })
             });
-          case 'UPDATE_GRAPE_URL':
+          case 'UPDATE_GRAPE_META':
             return _.assign({}, state, {
               grapes: _.map(state.grapes, (grape) => {
                 if (grape.id == action.grape) {
-                  return _.assign({}, grape, { url: action.url });
+                  return _.assign({}, grape, { meta: action.meta });
                 } else {
                   return _.assign({}, grape);
                 }
@@ -1095,7 +1095,7 @@
           }).join('');
 
           this.props.updateName(this.vineyard.id,
-            `${region} (${x},${y}) ${states}: ${flavors.join(',')}`.slice(0, 126)
+            `${region} (${x},${y}) ${states}: ${flavors.join(', ')}`.slice(0, 126)
           );
         }
 
@@ -1117,7 +1117,7 @@
           })();
 
           return (<div id="vineyard-main" className="main">
-            <div className="vineyard-information">
+            <div className="vineyard-information information">
               <div>
                 <div>Name:
                   <input type="text"
@@ -1309,7 +1309,7 @@
           super(props);
 
           _.bindAll(this, [
-            'updateStarting', 'updateName', 'updateUrl'
+            'updateStarting', 'updateName', 'updateMeta'
           ]);
         }
 
@@ -1321,8 +1321,30 @@
           this.props.updateName(this.grape.id, evt.target.value);
         }
 
-        updateUrl(evt) {
-          this.props.updateUrl(this.grape.id, evt.target.value);
+        updateMeta(evt) {
+          this.props.updateMeta(this.grape.id, this.readMeta());
+        }
+
+        readMeta() {
+          const url = this.metaRef.querySelector('.grape-url').value;
+          const phenotype = this.metaRef.querySelector('.grape-phenotype').value;
+          const hue = this.metaRef.querySelector('select').value;
+
+          return { url, phenotype, hue };
+        }
+
+        renderHues() {
+          const hues = [ '', 'White', 'Rose', 'Light Red', 'Red',
+            'Dark Red', 'Purple-Red', 'Purple', 'Deep Purple'
+          ].map((hue) => {
+            return <option key={hue} selected={hue == _.get(this.grape, 'meta.hue')}>
+              {hue}
+            </option>;
+          });
+
+          return <select onChange={this.updateMeta}>
+            {hues}
+          </select>;
         }
 
         render() {
@@ -1342,21 +1364,33 @@
             });
 
           return (<div id="grape-main" className="main">
-            <div>Name:
-              <input type="text"
-                onChange={this.updateName}
-                value={this.grape.name} />
-            </div>
-            <div>URL:
-              <input type="text"
-                onChange={this.updateUrl}
-                value={this.grape.url}/>
-            </div>
-            <div>Starting Grapes:
-              <input
-              type="number" min="0" step="1"
-              onChange={this.updateStarting}
-              value={this.grape.starting} />
+            <div className="grape-information information">
+              <div>
+                <div>Name:
+                  <input type="text"
+                    onChange={this.updateName}
+                    value={this.grape.name} />
+                </div>
+                <div>Starting Grapes:
+                  <input
+                  type="number" min="0" step="1"
+                  onChange={this.updateStarting}
+                  value={this.grape.starting} />
+                </div>
+              </div>
+              <div className="grape-meta" ref={(ref) => this.metaRef = ref}>
+                <div>URL:
+                  <input type="text" className="grape-url"
+                    onChange={this.updateMeta}
+                    value={_.get(this.grape, 'meta.url')}/>
+                </div>
+                <div>Phenotype:
+                  <input type="text" className="grape-phenotype"
+                    onChange={this.updateMeta}
+                    value={_.get(this.grape, 'meta.phenotype')}/>
+                </div>
+                <div>Hue: {this.renderHues()}</div>
+              </div>
             </div>
 
             {tendTables}
@@ -1370,8 +1404,8 @@
           updateStarting: (grape, starting) => {
             store.dispatch({ type: 'UPDATE_GRAPE_STARTING', grape, starting });
           },
-          updateUrl: (grape, url) => {
-            store.dispatch({ type: 'UPDATE_GRAPE_URL', grape, url });
+          updateMeta: (grape, meta) => {
+            store.dispatch({ type: 'UPDATE_GRAPE_META', grape, meta });
           },
           updateName: (grape, name) => {
             store.dispatch({ type: 'UPDATE_GRAPE_NAME', grape, name });
