@@ -1333,6 +1333,14 @@
           return { url, phenotype, hue };
         }
 
+        renderUrl() {
+          const url = _.get(this.grape, 'meta.url');
+
+          if (url) {
+            return <span>(<a href={url}>link</a>)</span>;
+          }
+        }
+
         renderHues() {
           const hues = [ '', 'White', 'Rose', 'Light Red', 'Red',
             'Dark Red', 'Purple-Red', 'Purple', 'Deep Purple'
@@ -1383,6 +1391,7 @@
                   <input type="text" className="grape-url"
                     onChange={this.updateMeta}
                     value={_.get(this.grape, 'meta.url')}/>
+                  {this.renderUrl()}
                 </div>
                 <div>Phenotype:
                   <input type="text" className="grape-phenotype"
