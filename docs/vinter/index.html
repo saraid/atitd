@@ -59,6 +59,7 @@
         padding: 0.4em;
         border-bottom: dotted 1px darkgray;
         cursor: pointer;
+        overflow: hidden;
       }
 
       .listing:hover {
@@ -79,6 +80,19 @@
 
       .vineyard {
         margin-top: 1.5em;
+      }
+
+      #vineyard-main .vineyard-information {
+        display: flex;
+        justify-content: space-between;
+      }
+
+      #vineyard-main .vineyard-information .vineyard-meta {
+        text-align: right;
+      }
+
+      #vineyard-main .vineyard-information .vineyard-meta select.flavor {
+        width: 6em;
       }
 
       .show-grape-detail {
@@ -243,6 +257,25 @@
         }
       ];
 
+      const vineyardFlavors = [
+        '',
+        "Acetaldehyde","Acetic Acid","Almond","Apple","Apricot","Artichoke",
+        "Artificial Fruit","Asparagus","Banana","Bell Pepper","Black Olives",
+        "Black Pepper","Blackberry","Burnt Matches","Burnt Toast","Buteric Acid",
+        "Butter","Butterscotch","Cabbage","Cassis","Cedar","Cherry","Chocolate",
+        "Cloves","Coffee","Diesel","Dust","Ethanol","Ethyl Acetate","Eucalyptus",
+        "Fig","Filter Pads","Fish","Flor Yeast","Fusel Alcohol","Garlic",
+        "Geraniums","Grapefruit","Grass","Green Beans","Green Olives","Hazelnut",
+        "Honey","Horsey Smells","Hot Alcohol","Hydrogen Sulfide","Kerosene","Leesy",
+        "Lemon","Licorice","Linalool","Melon","Menthol","Mercaptan",
+        "Methyl Anthranilate","Mildew","Mint","Molasses","Moldy Cork",
+        "Mousey Smells","Mushrooms","Oak","Orange Blossoms","Peach","Pineapple",
+        "Plastic","Prune","Raisin","Raspberry","Roses","Rubber","Sauerkraut",
+        "Sharp Sulfur","Skunk","Smoke","Soap","Sorbate","Soy Sauce","Stemmy",
+        "Straw","Strawberry","Strawberry Jam","Sweat","Tar","Tea","Tobacco",
+        "Vanilla","Violets","Walnut","Wet Cardboard","Wet Wool"
+      ];
+
       function vineyardApp(state = initialState, action) {
         console.log(action.type, action);
         switch(action.type) {
@@ -337,6 +370,16 @@
                     }),
                     strategy: action.strategy == 'Custom' ? null : action.strategy
                   });
+                } else {
+                  return _.assign({}, vineyard);
+                }
+              })
+            });
+          case 'UPDATE_VINEYARD_META':
+            return _.assign({}, state, {
+              vineyards: _.map(state.vineyards, (vineyard) => {
+                if (vineyard.id == action.vineyard) {
+                  return _.assign({}, vineyard, { meta: action.meta });
                 } else {
                   return _.assign({}, vineyard);
                 }
@@ -943,7 +986,8 @@
           super(props);
 
           _.bindAll(this, [
-            'changeGrape', 'changeStrategy', 'updateName', 'showDetails'
+          'changeGrape', 'changeStrategy', 'updateName', 'showDetails',
+          'updateMeta', 'distillName'
           ]);
         }
 
@@ -980,6 +1024,81 @@
           changeTab('grapes', this.vineyard.grape);
         }
 
+        readMeta() {
+          const region = this.metaRef.querySelector('#region').value;
+          const [ x, y ] = _.map(this.metaRef.querySelectorAll('input'), (i) => i.value);
+          const flavors = _.map(this.metaRef.querySelectorAll('.flavor'), (i) => i.value);
+
+          return {
+            region, x, y, flavors
+          };
+        }
+
+        updateMeta() {
+          this.props.updateMeta(this.vineyard.id, this.readMeta());
+        }
+
+        renderRegions() {
+          const regions = [
+              '',"CCR","CotS","DoN","DoS","EG","4C","LoR","MV",
+              "OE","RP","7L","Sinai","SE","VoK"].map(
+            (region) => {
+              return <option key={region} selected={region == _.get(this.vineyard, 'meta.region')}>{region}</option>;
+            });
+          return <select id="region" onChange={this.updateMeta}>
+            {regions}
+          </select>;
+        }
+
+        renderCoord(axis) {
+          const props = {
+            x: {
+              min: -3070,
+              max: 5120,
+              value: _.get(this.vineyard, 'meta.x')
+            },
+            y: {
+              min: -8200,
+              max: 8200,
+              value: _.get(this.vineyard, 'meta.y')
+            }
+          }[axis];
+          return <input type="number" onChange={this.updateMeta} {...props}/>;
+        }
+
+        renderFlavors(index) {
+          const currentFlavor = _.get(this.vineyard, `meta.flavors.${index}`);
+          const flavors = vineyardFlavors.map((flavor) => {
+            return <option key={flavor}
+            selected={currentFlavor == flavor}>
+              {flavor}
+            </option>;
+          });
+          return <select title={currentFlavor} className="flavor" onChange={this.updateMeta}>
+            {flavors}
+          </select>;
+        }
+
+        distillName() {
+          const { region, x, y, flavors } = this.readMeta();
+
+          const states = this.vineyard.states.map((state) => {
+            return {
+              'The vines are sagging a bit': 'G',
+              'Leaves are wilting': 'W',
+              'A musty smell can be detected': 'M',
+              'Stems look especially fat': 'F',
+              'Leaves rustle in the breeze': 'R',
+              'The grapes are starting to shrivel': 'V',
+              'Leaves shimmer with moisture': 'H'
+            }[state];
+          }).join('');
+
+          this.props.updateName(this.vineyard.id,
+            `${region} (${x},${y}) ${states}: ${flavors.join(',')}`.slice(0, 126)
+          );
+        }
+
         render() {
           this.vineyard = _.find(this.props.vineyards, (vineyard) => {
             return vineyard.id == this.props.vineyard;
@@ -998,22 +1117,41 @@
           })();
 
           return (<div id="vineyard-main" className="main">
-            <div>Name:
-              <input type="text"
-                onChange={this.updateName}
-                value={this.vineyard.name} />
-            </div>
-            <div>Grape:
-              <select onChange={this.changeGrape}>
-                <option></option>
-                {this.grapeList()}
-              </select>
-              {grapeDetail}
-            </div>
-            <div>Strategy:
-              <select onChange={this.changeStrategy}>
-                {this.strategyList()}
-              </select>
+            <div className="vineyard-information">
+              <div>
+                <div>Name:
+                  <input type="text"
+                    onChange={this.updateName}
+                    value={this.vineyard.name} />
+                </div>
+                <div>Grape:
+                  <select onChange={this.changeGrape}>
+                    <option></option>
+                    {this.grapeList()}
+                  </select>
+                  {grapeDetail}
+                </div>
+                <div>Strategy:
+                  <select onChange={this.changeStrategy}>
+                    {this.strategyList()}
+                  </select>
+                </div>
+              </div>
+              <div className="vineyard-meta" ref={(ref) => this.metaRef = ref}>
+                <div>Location:
+                  {this.renderRegions()}
+                  {this.renderCoord('x')}
+                  {this.renderCoord('y')}
+                </div>
+                <div>Flavors:
+                  {this.renderFlavors(0)}
+                  {this.renderFlavors(1)}
+                  {this.renderFlavors(2)}
+                </div>
+                <div>
+                  <button onClick={this.distillName}>Auto-Generate a Name!</button>
+                </div>
+              </div>
             </div>
 
             <Vineyard vineyard={this.vineyard} />
@@ -1033,6 +1171,9 @@
           },
           updateName: (vineyard, name) => {
             store.dispatch({ type: 'UPDATE_VINEYARD_NAME', vineyard, name });
+          },
+          updateMeta: (vineyard, meta) => {
+            store.dispatch({ type: 'UPDATE_VINEYARD_META', vineyard, meta });
           }
         }}
       )(VineyardDesignerComponent);
