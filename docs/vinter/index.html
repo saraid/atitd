@@ -98,7 +98,7 @@
       }
 
       #grape-main input[type="number"] {
-        width: 35px;
+        width: 40px;
       }
     </style>
   </head>
@@ -220,13 +220,17 @@
         {
           name: 'Maximum Gain of Grapes',
           evaluate: (state, grape) => {
-            return _.maxBy(_.keys(grape[state]), (tend) => grape[state][tend].g);
+            return _.maxBy(_.keys(grape[state]),
+              (tend) => (grape[state][tend].g * 100) + grape[state][tend].v
+            );
           }
         },
         {
           name: 'Maximum Gain of Sugar',
           evaluate: (state, grape) => {
-            return _.maxBy(_.keys(grape[state]), (tend) => grape[state][tend].s);
+            return _.maxBy(_.keys(grape[state]),
+              (tend) => (grape[state][tend].s * 100) + grape[state][tend].v
+            );
           }
         },
         {
@@ -303,6 +307,20 @@
                       vigor: 100,
                       step: 0
                     }]
+                  });
+                } else {
+                  return _.assign({}, vineyard);
+                }
+              })
+            });
+          case 'CLEAR_VINEYARD_ACTIONS':
+            return _.assign({}, state, {
+              vineyards: _.map(state.vineyards, (vineyard) => {
+                if (vineyard.id == action.vineyard) {
+                  return _.assign({}, vineyard, {
+                    steps: _.map(vineyard.steps, (step) => {
+                      return _.assign({}, step, { tend: null });
+                    })
                   });
                 } else {
                   return _.assign({}, vineyard);
@@ -493,7 +511,6 @@
             states.forEach((state) => {
               _.assign(newGrape, {
                 [state]: _.zipObject(tend, _(7).times(() => _.clone(character)))
-                //_.zip(tend, _(7).times(_.constant(character)))
               });
             });
 
@@ -506,6 +523,8 @@
       };
 
       const runVineyardCultivation = () => {
+        console.log('running Vineyard Cultivation');
+
         const currState = store.getState();
         let currVineyard;
         const refreshVineyardFromStore = () => {
@@ -514,6 +533,11 @@
           });
         }
         refreshVineyardFromStore();
+
+        if (!_.isNil(currVineyard.strategy)) {
+          store.dispatch({ type: 'CLEAR_VINEYARD_ACTIONS', vineyard: currVineyard.id });
+          refreshVineyardFromStore();
+        }
 
         if (_.isNil(currVineyard)) { return; }
         if (_.isNil(currVineyard.grape)) { return; }
@@ -909,6 +933,7 @@
         (dispatch) => { return {
           addStates: (vineyard, num) => {
             store.dispatch({ type: 'ADD_STATES', vineyard, num });
+            runVineyardCultivation();
           }
         }}
       )(VineyardComponent);
