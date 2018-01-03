@@ -314,6 +314,9 @@
               vineyards: _.map(state.vineyards, (vineyard) => {
                 if (vineyard.id == action.vineyard) {
                   return _.assign({}, vineyard, {
+                    steps: _.map(vineyard.steps, (step) => {
+                      return _.assign({}, step, { tend: null });
+                    }),
                     strategy: action.strategy == 'Custom' ? null : action.strategy
                   });
                 } else {
@@ -356,7 +359,7 @@
               grapes: _.map(state.grapes, (grape) => {
                 if (grape.id == action.grape) {
                   let clone = _.clone(grape)
-                  _.set(clone, action.path.join('.'), action.num);
+                  _.set(clone, action.path, action.num);
                   return clone;
                 } else {
                   return _.assign({}, grape);
@@ -489,7 +492,7 @@
 
             states.forEach((state) => {
               _.assign(newGrape, {
-                [state]: _.zipObject(tend, _(7).times(_.constant(character)))
+                [state]: _.zipObject(tend, _(7).times(() => _.clone(character)))
                 //_.zip(tend, _(7).times(_.constant(character)))
               });
             });
@@ -608,6 +611,10 @@
             }
 
             const previousStep = _.last(cultivation);
+
+            if (previousStep.vigor == '--') {
+              return cultivation;
+            }
 
             if (_.isNil(previousStep.tend)) {
               if (_.isNil(strategy)) {
