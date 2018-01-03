@@ -87,10 +87,6 @@
         justify-content: space-between;
       }
 
-      .information .meta {
-        text-align: right;
-      }
-
       #vineyard-main .vineyard-information .vineyard-meta select.flavor {
         width: 6em;
       }
@@ -1390,13 +1386,13 @@
                 <div>URL:
                   <input type="text" className="grape-url"
                     onChange={this.updateMeta}
-                    value={_.get(this.grape, 'meta.url')}/>
+                    value={_.get(this.grape, 'meta.url', '')}/>
                   {this.renderUrl()}
                 </div>
                 <div>Phenotype:
                   <input type="text" className="grape-phenotype"
                     onChange={this.updateMeta}
-                    value={_.get(this.grape, 'meta.phenotype')}/>
+                    value={_.get(this.grape, 'meta.phenotype', '')}/>
                 </div>
                 <div>Hue: {this.renderHues()}</div>
               </div>
