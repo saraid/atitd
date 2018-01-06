@@ -236,6 +236,14 @@
           }
         },
         {
+          name: 'Maximum Gain of Quality',
+          evaluate: (state, grape) => {
+            return _.maxBy(_.keys(grape[state]),
+              (tend) => (grape[state][tend].q * 100) + grape[state][tend].v
+            );
+          }
+        },
+        {
           name: 'Maximum Gain of Sugar',
           evaluate: (state, grape) => {
             return _.maxBy(_.keys(grape[state]),
@@ -255,21 +263,21 @@
 
       const vineyardFlavors = [
         '',
-        "Acetaldehyde","Acetic Acid","Almond","Apple","Apricot","Artichoke",
-        "Artificial Fruit","Asparagus","Banana","Bell Pepper","Black Olives",
-        "Black Pepper","Blackberry","Burnt Matches","Burnt Toast","Buteric Acid",
-        "Butter","Butterscotch","Cabbage","Cassis","Cedar","Cherry","Chocolate",
-        "Cloves","Coffee","Diesel","Dust","Ethanol","Ethyl Acetate","Eucalyptus",
-        "Fig","Filter Pads","Fish","Flor Yeast","Fusel Alcohol","Garlic",
-        "Geraniums","Grapefruit","Grass","Green Beans","Green Olives","Hazelnut",
-        "Honey","Horsey Smells","Hot Alcohol","Hydrogen Sulfide","Kerosene","Leesy",
-        "Lemon","Licorice","Linalool","Melon","Menthol","Mercaptan",
-        "Methyl Anthranilate","Mildew","Mint","Molasses","Moldy Cork",
-        "Mousey Smells","Mushrooms","Oak","Orange Blossoms","Peach","Pineapple",
-        "Plastic","Prune","Raisin","Raspberry","Roses","Rubber","Sauerkraut",
-        "Sharp Sulfur","Skunk","Smoke","Soap","Sorbate","Soy Sauce","Stemmy",
-        "Straw","Strawberry","Strawberry Jam","Sweat","Tar","Tea","Tobacco",
-        "Vanilla","Violets","Walnut","Wet Cardboard","Wet Wool"
+        "Acetaldehyde", "Acetic Acid", "Almond", "Apple", "Apricot", "Artichoke",
+        "Artificial Fruit", "Asparagus", "Banana", "Bell Pepper", "Black Olives",
+        "Black Pepper", "Blackberry", "Burnt Matches", "Burnt Toast", "Buteric Acid",
+        "Butter", "Butterscotch", "Cabbage", "Cassis", "Cedar", "Cherry", "Chocolate",
+        "Cloves", "Coffee", "Diesel", "Dust", "Ethanol", "Ethyl Acetate", "Eucalyptus",
+        "Fig", "Filter Pads", "Fish", "Flor Yeast", "Fusel Alcohol", "Garlic",
+        "Geraniums", "Grapefruit", "Grass", "Green Beans", "Green Olives", "Hazelnut",
+        "Honey", "Horsey Smells", "Hot Alcohol", "Hydrogen Sulfide", "Kerosene",
+        "Leesy", "Lemon", "Licorice", "Linalool", "Melon", "Menthol", "Mercaptan",
+        "Methyl Anthranilate", "Mildew", "Mint", "Molasses", "Moldy Cork",
+        "Mousey Smells", "Mushrooms", "Oak", "Orange Blossoms", "Peach", "Pineapple",
+        "Plastic", "Prune", "Raisin", "Raspberry", "Roses", "Rubber", "Sauerkraut",
+        "Sharp Sulfur", "Skunk", "Smoke", "Soap", "Sorbate", "Soy Sauce", "Stemmy",
+        "Straw", "Strawberry", "Strawberry Jam", "Sweat", "Tar", "Tea", "Tobacco",
+        "Vanilla", "Violets", "Walnut", "Wet Cardboard", "Wet Wool"
       ];
 
       function vineyardApp(state = initialState, action) {
