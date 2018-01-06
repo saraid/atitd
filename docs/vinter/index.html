@@ -793,6 +793,25 @@
         (dispatch) => { return { createListing }; }
       )(NewListingComponent);
 
+      class ImportExportComponent extends React.Component {
+        render() {
+          return (<div>
+            <button>
+              📥 Import
+            </button>
+            <button>
+              📤 Export
+            </button>
+          </div>);
+        }
+      }
+      const ImportExport = ReactRedux.connect(
+        (state) => state,
+        (dispatch) => { return {
+          showModal: () => { dispatch({ type: 'SHOW_MODAL' }); }
+        }; }
+      )(ImportExportComponent);
+
       class VineyardListComponent extends React.Component {
         render() {
           const vineyards = this.props.vineyards.map((vineyard) => {
@@ -1023,7 +1042,7 @@
         readMeta() {
           const region = this.metaRef.querySelector('#region').value;
           const [ x, y ] = _.map(this.metaRef.querySelectorAll('input'), (i) => i.value);
-          const flavors = _.map(this.metaRef.querySelectorAll('.flavor'), (i) => i.value);
+          const flavors = _.compact(_.map(this.metaRef.querySelectorAll('.flavor'), (i) => i.value));
 
           return {
             region, x, y, flavors
@@ -1039,7 +1058,10 @@
               '',"CCR","CotS","DoN","DoS","EG","4C","LoR","MV",
               "OE","RP","7L","Sinai","SE","VoK"].map(
             (region) => {
-              return <option key={region} selected={region == _.get(this.vineyard, 'meta.region')}>{region}</option>;
+              return (<option key={region}
+                  selected={region == _.get(this.vineyard, 'meta.region')}>
+                {region}
+              </option>);
             });
           return <select id="region" onChange={this.updateMeta}>
             {regions}
@@ -1132,6 +1154,7 @@
                     {this.strategyList()}
                   </select>
                 </div>
+                <ImportExport name={this.vineyard.id} />
               </div>
               <div className="vineyard-meta" ref={(ref) => this.metaRef = ref}>
                 <div>Location:
@@ -1381,6 +1404,7 @@
                   onChange={this.updateStarting}
                   value={this.grape.starting} />
                 </div>
+                <ImportExport name={this.grape.id} />
               </div>
               <div className="grape-meta" ref={(ref) => this.metaRef = ref}>
                 <div>URL:
