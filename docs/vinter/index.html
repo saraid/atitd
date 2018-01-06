@@ -361,9 +361,6 @@
               vineyards: _.map(state.vineyards, (vineyard) => {
                 if (vineyard.id == action.vineyard) {
                   return _.assign({}, vineyard, {
-                    steps: _.map(vineyard.steps, (step) => {
-                      return _.assign({}, step, { tend: null });
-                    }),
                     strategy: action.strategy == 'Custom' ? null : action.strategy
                   });
                 } else {
@@ -927,6 +924,7 @@
           updateAction: (vineyard, index, action) => {
             store.dispatch({ type: 'UPDATE_VINEYARD_ACTION', vineyard, index, action });
             runVineyardCultivation();
+            store.dispatch({ type: 'UPDATE_VINEYARD_STRATEGY', vineyard, strategy: null });
           },
           updateCursor: (vineyard, cursor) => {
             store.dispatch({ type: 'UPDATE_VINEYARD_CURSOR', vineyard, cursor });
