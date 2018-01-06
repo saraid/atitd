@@ -199,10 +199,14 @@
           }
         ],
         barrels: [
-          { name: 'meh' }
+          {
+            id: _.uniqueId('barrel'),
+            name: 'blargh',
+            sources: []
+          }
         ],
         ux: {
-          currentTab: 'vineyards',
+          currentTab: 'barrels',
           currentMain: null
         }
       };
@@ -283,6 +287,18 @@
       function vineyardApp(state = initialState, action) {
         console.log(action.type, action);
         switch(action.type) {
+          case 'ADD_BARREL_SOURCE':
+            return _.assign({}, state, {
+              barrels: _.map(state.barrels, (barrel) => {
+                if (barrel.id == action.barrel) {
+                  let sources = _.map(barrel.sources, _.identity);
+                  sources.push({});
+                  return _.assign({}, barrel, { sources });
+                } else {
+                  return barrel;
+                }
+              })
+            });
           case 'UPDATE_VINEYARD_STATE':
             return _.assign({}, state, {
               vineyards: _.map(state.vineyards, (vineyard) => {
@@ -312,7 +328,7 @@
                 }
               })
             });
-          case 'ADD_STATES':
+          case 'ADD_VINEYARD_STATES':
             return _.assign({}, state, {
               vineyards: _.map(state.vineyards, (vineyard) => {
                 if (vineyard.id == action.vineyard) {
@@ -619,7 +635,7 @@
 
         if (!_.isNil(_.last(currVineyard.steps).tend) &&
             stepsUntilNilTend >= Math.max(1, _.size(currVineyard.states))) {
-          store.dispatch({ type: 'ADD_STATES', vineyard: currVineyard.id, num: 1 });
+          store.dispatch({ type: 'ADD_VINEYARD_STATES', vineyard: currVineyard.id, num: 1 });
           refreshVineyardFromStore();
         }
 
@@ -997,7 +1013,7 @@
         (state) => state,
         (dispatch) => { return {
           addStates: (vineyard, num) => {
-            store.dispatch({ type: 'ADD_STATES', vineyard, num });
+            store.dispatch({ type: 'ADD_VINEYARD_STATES', vineyard, num });
             runVineyardCultivation();
           }
         }}
@@ -1461,11 +1477,193 @@
         (state) => state
       )(GrapeViewComponent);
 
-      class BarrelView extends React.Component {
+      class BarrelComponent extends React.Component {
+        constructor(props) {
+          super(props);
+
+          _.bindAll(this, [
+            'addSource'
+          ]);
+        }
+
+        addSource(evt) {
+          this.props.addSource(this.props.barrel.id);
+        }
+
+        renderVineyardSource(source) {
+          const currVineyard = _.find(this.props.vineyards, (vineyard) => {
+            return vineyard.id == source.id;
+          });
+          const lastStep = currVineyard ?
+            _.findLast(currVineyard.steps, (step) => step.vigor) :
+            {};
+
+          const vineyards = this.props.vineyards.map((vineyard) => {
+            return <option key={vineyard.id} value={vineyard.id}
+                selected={currVineyard && currVineyard.id == vineyard.id}>
+              {vineyard.name}
+            </option>;
+          });
+
+          return (<tr>
+            <td><select>
+              <option></option>
+              {vineyards}
+            </select></td>
+            <td>
+              <input type="number" min="0" max={lastStep.grapes} step="1" />
+              / {lastStep.grapes}
+            </td>
+          </tr>);
+        }
+
         render() {
-          return <div>LOL have not even started</div>;
+          const sources = this.props.barrel.sources.map(
+            (source) => this.renderVineyardSource(source));
+          return (<table className="barrel">
+            <thead><tr>
+              <th>Vineyard Source</th>
+              <th>Grapes Added</th>
+            </tr></thead>
+            <tbody>
+              {sources}
+              <button onClick={this.addSource}>
+                Add Vineyard Source
+              </button>
+            </tbody>
+          </table>);
         }
       }
+      const Barrel = ReactRedux.connect(
+        (state) => state,
+        (dispatch) => { return {
+          addSource: (barrel) => {
+            store.dispatch({ type: 'ADD_BARREL_SOURCE', barrel });
+          }
+        }}
+      )(BarrelComponent);
+
+      class BarrelDesignerComponent extends React.Component {
+        constructor(props) {
+          super(props);
+
+          _.bindAll(this, [
+            'updateMeta'
+          ]);
+        }
+
+        updateMeta() {
+        }
+
+        renderRegions() {
+          const regions = [
+              '',"CCR","CotS","DoN","DoS","EG","4C","LoR","MV",
+              "OE","RP","7L","Sinai","SE","VoK"].map(
+            (region) => {
+              return (<option key={region}
+                  selected={region == _.get(this.vineyard, 'meta.region')}>
+                {region}
+              </option>);
+            });
+          return <select id="region" onChange={this.updateMeta}>
+            {regions}
+          </select>;
+        }
+
+        renderCoord(axis) {
+          const props = {
+            x: {
+              min: -3070,
+              max: 5120,
+              value: _.get(this.vineyard, 'meta.x')
+            },
+            y: {
+              min: -8200,
+              max: 8200,
+              value: _.get(this.vineyard, 'meta.y')
+            }
+          }[axis];
+          return <input type="number" onChange={this.updateMeta} {...props}/>;
+        }
+
+        render() {
+          this.barrel = _.find(this.props.barrels, (barrel) => {
+            return barrel.id == this.props.barrel;
+          });
+
+          if (_.isNil(this.barrel)) {
+            return (<div id="barrel-main" className="main"></div>);
+          }
+
+          return (<div id="barrel-main" className="main">
+            <div className="barrel-information information">
+              <div>
+                <div>Name:
+                  <input type="text"
+                    onChange={this.updateName}
+                    value={this.barrel.name} />
+                </div>
+              </div>
+              <div className="barrel-meta" ref={(ref) => this.metaRef = ref}>
+                <div>Location:
+                  {this.renderRegions()}
+                  {this.renderCoord('x')}
+                  {this.renderCoord('y')}
+                </div>
+              </div>
+            </div>
+
+            <div className="barrel-output">
+              <div>Bottles:</div>
+              <div>Maximum Alcohol:</div>
+              <div>Acid:</div>
+            </div>
+
+            <Barrel barrel={this.barrel} />
+          </div>);
+        }
+      }
+      const BarrelDesign = ReactRedux.connect(
+        (state) => state,
+        (dispatch) => { return {
+        //changeListing,
+        //updateStarting: (grape, starting) => {
+        //  store.dispatch({ type: 'UPDATE_GRAPE_STARTING', grape, starting });
+        //},
+        //updateMeta: (grape, meta) => {
+        //  store.dispatch({ type: 'UPDATE_GRAPE_META', grape, meta });
+        //},
+        //updateName: (grape, name) => {
+        //  store.dispatch({ type: 'UPDATE_GRAPE_NAME', grape, name });
+        //}
+        }}
+      )(BarrelDesignerComponent);
+
+      class BarrelListComponent extends React.Component {
+        render() {
+          const barrels = this.props.barrels.map((barrel) => {
+            return <Listing key={barrel.id} {...barrel} />
+          });
+
+          return (<div id="barrel-list" className="sidebar">
+            {barrels}
+            <NewListing />
+          </div>);
+        }
+      }
+      const BarrelList = ReactRedux.connect((state) => state)(BarrelListComponent);
+
+      class BarrelViewComponent extends React.Component {
+        render() {
+          return (<div id="barrel-view" className="view">
+            <BarrelList />
+            <BarrelDesign barrel={this.props.ux.currentMain} />
+          </div>);
+        }
+      }
+      const BarrelView = ReactRedux.connect(
+        (state) => state
+      )(BarrelViewComponent);
 
       class HelpView extends React.Component {
         render() {
