@@ -60,6 +60,7 @@
         border-bottom: dotted 1px darkgray;
         cursor: pointer;
         overflow: hidden;
+        word-break: break-all;
       }
 
       .listing:hover {
@@ -201,12 +202,12 @@
         barrels: [
           {
             id: _.uniqueId('barrel'),
-            name: 'blargh',
-            sources: []
+            name: 'oak barrel chestnut barrel redwood barrel cedar barrel',
+            sources: [{}]
           }
         ],
         ux: {
-          currentTab: 'barrels',
+          currentTab: 'about',
           currentMain: null
         }
       };
@@ -967,7 +968,7 @@
         }
 
         renderAddMoreSteps() {
-          const buttons = [ 1, 5, 10 ].map((num) => {
+          const buttons = [ 1, 5, 10, 20 ].map((num) => {
             return (<button key={num} onClick={() => this.addMoreSteps(num)}>
               +{num}
             </button>);
@@ -1667,15 +1668,37 @@
 
       class HelpView extends React.Component {
         render() {
-          return (<div className="view">
+          return (<div>
             <div>
-              Something about how to use stuff, plus a bunch of guides.
-              <br /><br />
+              Hello! The Vinter Tool is a sizable beast, so here's some guidance on how to use it.
+            </div>
+
+            <div>
+              First, if your'e not familiar with how wine works generally, read the wiki guide: 
               <a href="http://www.atitd.org/wiki/tale7/Wine">
                 http://www.atitd.org/wiki/tale7/Wine
               </a>
-              <br /><br />
+            </div>
+
+            <div>
+              You'll want to make sure your grapes are imported, with the tend tables fully filled out. If you don't see the strain you know, you can either add it by hand or ask Duiker to scrape the wiki page.
+            </div>
+
+            <div>
+              Next, you'll want to set up the Vineyards that you're monitoring.
+
+              Vineyards can be labeled with up to 126 characters.
               Recommended Vineyard naming scheme: "OE 1234,1234 [States] Flavors" (character limit 126; max flavor string length is 19) Region - 3, X - 5, Y - 5, Flavors - 19*3+2 - 59. That's 72. 120-72 = 48 left.
+
+              Something about how to use strategies and how they're expected to work.
+            </div>
+
+            <div>
+              Then, you'll want to look at barrels.
+
+              Barrels can and often should combine the product of several vineyards. The Barrel tool calculates the number of bottles you can expect to get, as well as the expected acidity and maximum alcohol level.
+
+              Unfortunately, since the formulae for determining how long it takes to age in a barrel is unknown, it can't predict how long you'll need to wait to achieve a certain alcohol or tannin level. If you have some information on these formulae, please feel free to pass it along. If I can come up with something reliable, I'll add it to the tool.
             </div>
           </div>);
         }
@@ -1683,14 +1706,18 @@
 
       class AboutView extends React.Component {
         render() {
-          return (<div className="view">
+          return (<div>
+            <div>
+              In Progress:
+              <ul>
+                <li>Create concept of barrels.</li>
+              </ul>
+            </div>
             <div>
               TODO:
               <ul>
                 <li>Allow export/import of grapes.</li>
                 <li>Allow export/import of vineyards.</li>
-                <li>Create vineyard strategies.</li>
-                <li>Create concept of barrels.</li>
               </ul>
             </div>
             <div>
@@ -1700,6 +1727,14 @@
                 <li>Track changes.</li>
                 <li>Allow undo/redo.</li>
               </ul>
+            </div>
+            <div>
+              Vinter Tool built by&nbsp;
+              <a href="http://www.atitd.org/wiki/tale7/User:Duiker">Duiker</a>.
+            </div>
+            <div>
+              Source Code:&nbsp;
+              <a href="https://github.com/saraid/atitd/blob/master/docs/vinter/index.html">Github</a>.
             </div>
           </div>);
         }
