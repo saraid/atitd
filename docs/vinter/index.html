@@ -284,7 +284,7 @@
         "Vanilla", "Violets", "Walnut", "Wet Cardboard", "Wet Wool"
       ];
 
-      function vineyardApp(state = initialState, action) {
+      function vinterApp(state = initialState, action) {
         console.log(action.type, action);
         switch(action.type) {
           case 'ADD_BARREL_SOURCE':
@@ -537,7 +537,7 @@
           default: return state;
         }
       };
-      let store = Redux.createStore(vineyardApp);
+      let store = Redux.createStore(vinterApp);
 
       const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
